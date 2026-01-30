@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Yatra | Login</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+  
+    body {
+      background: url('https://i.pinimg.com/736x/a0/60/37/a06037d1ef8ebd3dcbbb89cd0f99a246.jpg') no-repeat center center/cover;
+      min-height: 100vh;
+      font-family: 'Inter', sans-serif;
+      position: relative;
+      overflow: hidden;
+    }
+    body::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 50, 100, 0.5); /* blue overlay */
+      backdrop-filter: blur(2px);
+      z-index: 0;
+    }
+    .glass {
+      backdrop-filter: blur(20px);
+      background: rgba(255, 255, 255, 0.25);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      position: relative;
+      z-index: 10;
+    }
+    .fade {
+      transition: all 0.5s ease-in-out;
+    }
+  </style>
+</head>
+
+<body class="flex items-center justify-center relative">
+
+
+  <a href="index.html"
+     class="absolute top-6 left-6 bg-white/90 text-blue-700 px-4 py-2 rounded-full font-semibold shadow-lg hover:bg-blue-600 hover:text-white transition duration-300 flex items-center space-x-2 z-20">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+      viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+    </svg>
+    <span>Back to Home</span>
+  </a>
+
+  <!-- Main Container -->
+  <div class="flex flex-col md:flex-row glass rounded-3xl overflow-hidden shadow-2xl w-[90%] max-w-5xl">
+
+    <!-- Left Section -->
+    <div class="hidden md:flex flex-col items-center justify-center bg-gradient-to-b from-blue-800 to-blue-600 text-white w-1/2 p-10">
+      <h2 class="text-4xl font-bold mb-4 tracking-wide">Welcome to Yatra</h2>
+      <p class="text-blue-100 text-center leading-relaxed mb-8">
+        Explore the world with Yatra — your trusted travel partner.<br>
+        Login or create an account to start your journey today.
+      </p>
+    </div>
+
+    <!-- Right Section -->
+    <div class="w-full md:w-1/2 bg-white/90 p-8 md:p-10 relative">
+      <h1 class="text-3xl font-bold text-center text-blue-700 mb-6">Yatra Account</h1>
+
+      <!-- LOGIN FORM -->
+      <div id="loginForm" class="fade space-y-4">
+        <input id="loginEmail" type="email" placeholder="Email Address"
+               class="border border-gray-300 p-3 w-full rounded-lg" />
+        <input id="loginPassword" type="password" placeholder="Password"
+               class="border border-gray-300 p-3 w-full rounded-lg" />
+
+        <div class="flex items-center justify-between text-sm text-gray-600">
+          <label class="flex items-center space-x-2">
+            <input id="rememberMe" type="checkbox" class="text-blue-600 focus:ring-blue-500" />
+            <span>Remember Me</span>
+          </label>
+          <span class="hover:underline text-blue-600 cursor-pointer" onclick="showForgotPassword()">Forgot Password?</span>
+        </div>
+
+        <button onclick="login()" id="loginBtn"
+          class="bg-blue-600 hover:bg-blue-700 transition text-white w-full py-3 rounded-lg font-semibold shadow-md">
+          Login
+        </button>
+
+        <p class="text-sm text-center mt-3">
+          Don’t have an account?
+          <a href="#" class="text-blue-600 hover:underline font-medium" onclick="toggleForms()">Sign Up</a>
+        </p>
+      </div>
+
+      <!-- SIGNUP FORM -->
+      <div id="signupForm" class="hidden fade space-y-4">
+        <input id="signupName" type="text" placeholder="Full Name"
+               class="border border-gray-300 p-3 w-full rounded-lg" />
+        <input id="signupEmail" type="email" placeholder="Email Address"
+               class="border border-gray-300 p-3 w-full rounded-lg" />
+        <input id="signupPassword" type="password" placeholder="Password"
+               class="border border-gray-300 p-3 w-full rounded-lg" />
+        <input id="signupConfirm" type="password" placeholder="Confirm Password"
+               class="border border-gray-300 p-3 w-full rounded-lg" />
+
+        <button onclick="signup()"
+          class="bg-blue-600 hover:bg-blue-700 transition text-white w-full py-3 rounded-lg font-semibold shadow-md">
+          Create Account
+        </button>
+
+        <p class="text-sm text-center mt-3">
+          Already have an account?
+          <a href="#" class="text-blue-600 hover:underline font-medium" onclick="toggleForms()">Login</a>
+        </p>
+      </div>
+
+      <!-- FORGOT PASSWORD -->
+      <div id="forgotPasswordForm" class="hidden fade space-y-4">
+        <h3 class="text-xl text-center text-blue-700 font-semibold mb-2">Reset Password</h3>
+        <input id="forgotEmail" type="email" placeholder="Enter your email"
+               class="border border-gray-300 p-3 w-full rounded-lg" />
+        <button onclick="sendResetLink()"
+          class="bg-blue-600 hover:bg-blue-700 transition text-white w-full py-3 rounded-lg font-semibold shadow-md">
+          Send Reset Link
+        </button>
+        <p class="text-sm text-center mt-3">
+          <a href="#" class="text-blue-600 hover:underline font-medium" onclick="toggleToLogin()">Back to Login</a>
+        </p>
+      </div>
+
+      <!-- STATUS MESSAGE -->
+      <div id="statusMsg" class="text-center text-sm mt-4 h-5 font-medium"></div>
+    </div>
+  </div>
+
+  <script>
+    const loginForm = document.getElementById("loginForm");
+    const signupForm = document.getElementById("signupForm");
+    const forgotForm = document.getElementById("forgotPasswordForm");
+    const statusMsg = document.getElementById("statusMsg");
+    const loginBtn = document.getElementById("loginBtn");
+
+    const BASE_URL = "http://localhost:5000/api"; 
+
+    function toggleForms() {
+      loginForm.classList.toggle("hidden");
+      signupForm.classList.toggle("hidden");
+      forgotForm.classList.add("hidden");
+      showMessage("");
+    }
+
+    function showForgotPassword() {
+      loginForm.classList.add("hidden");
+      signupForm.classList.add("hidden");
+      forgotForm.classList.remove("hidden");
+      showMessage("");
+    }
+
+    function toggleToLogin() {
+      forgotForm.classList.add("hidden");
+      loginForm.classList.remove("hidden");
+      showMessage("");
+    }
+
+    function showMessage(msg, type = "info") {
+      statusMsg.textContent = msg;
+      statusMsg.className = `text-center text-sm mt-4 font-medium ${
+        type === "success" ? "text-green-600" :
+        type === "error" ? "text-red-600" : "text-gray-600"
+      }`;
+    }
+
+    function validateEmail(email) {
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    }
+
+    async function signup() {
+      const name = signupName.value.trim();
+      const email = signupEmail.value.trim();
+      const password = signupPassword.value.trim();
+      const confirm = signupConfirm.value.trim();
+
+      if (!name || !email || !password || !confirm)
+        return showMessage("All fields are required.", "error");
+      if (!validateEmail(email)) return showMessage("Invalid email format.", "error");
+      if (password !== confirm) return showMessage("Passwords do not match.", "error");
+
+      showMessage("Creating account...", "info");
+
+      try {
+        const res = await fetch(`${BASE_URL}/signup`, {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({ name, email, password })
+        });
+        const data = await res.json();
+        if (data.success) {
+          showMessage("Signup successful! Please login.", "success");
+          setTimeout(() => toggleForms(), 1200);
+        } else showMessage(data.message || "Signup failed.", "error");
+      } catch {
+        showMessage("Server error. Please try again.", "error");
+      }
+    }
+
+    async function login() {
+      const email = loginEmail.value.trim();
+      const password = loginPassword.value.trim();
+
+      if (!email || !password)
+        return showMessage("Enter credentials.", "error");
+      if (!validateEmail(email))
+        return showMessage("Invalid email format.", "error");
+
+      showMessage("Authenticating...", "info");
+      loginBtn.disabled = true;
+      loginBtn.textContent = "Logging in...";
+
+      try {
+        const res = await fetch(`${BASE_URL}/login`, {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({ email, password })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          showMessage("Login successful! Redirecting...", "success");
+          localStorage.setItem("user", JSON.stringify(data.user));
+          setTimeout(() => (window.location.href = "dashboard.html"), 1200);
+        } else {
+          showMessage(data.message || "Invalid credentials.", "error");
+        }
+      } catch {
+        showMessage("Server error. Try again later.", "error");
+      } finally {
+        loginBtn.disabled = false;
+        loginBtn.textContent = "Login";
+      }
+    }
+
+    function sendResetLink() {
+      const email = document.getElementById("forgotEmail").value.trim();
+      if (!email) return showMessage("Enter your email address.", "error");
+      if (!validateEmail(email)) return showMessage("Invalid email format.", "error");
+      showMessage(`Password reset link sent to ${email}.`, "success");
+      setTimeout(() => toggleToLogin(), 1500);
+    }
+  </script>
+</body>
+</html>

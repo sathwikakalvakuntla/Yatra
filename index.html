@@ -1,0 +1,1182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yatra - Your Travel Companion</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+    body {
+     box-sizing: border-box;
+    }
+    .destination-card {
+    min-width: 280px;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(12px);
+    border-radius: 1.5rem;
+    box-shadow: 0 8px 24px rgba(30, 64, 175, 0.1);
+    overflow: hidden;
+    transition: all 0.4s ease-in-out;
+  }
+
+  .destination-card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 12px 30px rgba(37, 99, 235, 0.25);
+  }
+
+  .destination-img {
+    width: 100%;
+    height: 13rem;
+    object-fit: cover;
+    transition: transform 0.5s ease-in-out;
+  }
+
+  .destination-card:hover .destination-img {
+    transform: scale(1.1);
+  }
+
+  .destination-content {
+    padding: 1.25rem;
+  }
+
+  .destination-content h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #1e3a8a;
+    margin-bottom: 0.5rem;
+  }
+
+  .destination-content p {
+    font-size: 0.9rem;
+    color: #4b5563;
+    line-height: 1.5;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .event-card { height: 100%; }
+
+        
+        .hero-content {
+            position: relative;
+            z-index: 2;
+        }
+    
+        .package-card:hover {
+            transform: scale(1.02);
+            transition: transform 0.3s ease;
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+              display: none;
+        }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+ .popup {
+    display: none; 
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.6);
+    justify-content: center; align-items: center;
+    z-index: 1000;
+}
+
+.popup-content {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    width: 300px;
+    position: relative;
+}
+
+.popup .close {
+    position: absolute;
+    top: 10px; right: 15px;
+    cursor: pointer; font-weight: bold;
+}
+
+.popup input { width: 100%; padding: 10px; margin: 5px 0; }
+.popup button { width: 100%; padding: 10px; margin-top: 10px; background:#007BFF; color:white; border:none; border-radius:5px; }
+.popup p.message { color:red; font-size:0.9em; margin-top:5px; }
+.popup .switch { color:blue; cursor:pointer; text-decoration:underline; font-size:0.9em; }
+
+.modal {
+  display: none; 
+  position: fixed; 
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.7);
+  justify-content: center; 
+  align-items: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s;
+}
+
+
+.modal-content {
+  background: #fff;
+  width: 450px;
+  max-width: 90%;
+  padding: 30px 25px;
+  border-radius: 12px;
+  position: relative;
+  animation: slideUp 0.3s ease-out;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+}
+
+.modal .close {
+  position: absolute;
+  top: 15px; right: 20px;
+  font-size: 24px;
+  cursor: pointer;
+  color: #333;
+}
+
+
+.modal-header h2 { margin: 0; font-size: 28px; color: #333; }
+.modal-header p { font-size: 14px; color: #666; margin-bottom: 15px; }
+
+.modal-content input {
+  width: 100%;
+  padding: 12px 10px;
+  margin: 8px 0;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+}
+
+
+.submit-btn {
+  width: 100%;
+  padding: 12px;
+  margin-top: 12px;
+  border: none;
+  border-radius: 6px;
+  background: linear-gradient(90deg,#ff7eb3,#ff758c);
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+.submit-btn:hover { background: linear-gradient(90deg,#ff758c,#ff7eb3); }
+
+.message { color: red; font-size: 14px; margin-top: 5px; text-align: center; }
+
+
+.switch-text { text-align: center; margin-top: 10px; font-size: 14px; }
+.switch { color: #ff758c; cursor: pointer; font-weight: bold; text-decoration: underline; }
+
+
+@keyframes fadeIn { from{opacity:0} to{opacity:1} }
+@keyframes slideUp { from{transform: translateY(50px); opacity:0;} to{transform: translateY(0); opacity:1;} }
+  .footer-link {
+    color: white;
+    text-decoration: none;
+    transition: color 0.3s ease, transform 0.3s ease;
+    display: inline-block;
+    margin-bottom: 8px;
+  }
+  .footer-link:hover {
+    color: yellow;
+    transform: translateX(4px);
+  }
+
+  .social-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: 2px solid white;
+    border-radius: 50%;
+    color: white;
+    text-decoration: none;
+    font-size: 1.1em;
+    transition: background-color 0.3s ease, color 0.3s ease, transform 0.3s ease;
+  }
+  .social-icon:hover {
+    color: indigo;
+    background-color: yellow;
+    transform: scale(1.2);
+    border-color: yellow;
+  }
+
+  
+  .social-icon.facebook:hover   { background:#3b5998; color:white; }
+  .social-icon.instagram:hover  { background:#e4405f; color:white; }
+  .social-icon.twitter:hover    { background:#55acee; color:white; }
+  .social-icon.linkedin:hover   { background:#0077b5; color:white; }
+  .social-icon.youtube:hover    { background:#ff0000; color:white; }
+   </style>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-gray-50">
+  <header class="bg-white/90 backdrop-blur-md shadow-md sticky top-0 z-50">
+  <div class="max-w-7xl mx-auto px-6 lg:px-8">
+    <div class="flex justify-between items-center py-4">
+
+      
+      <div class="flex items-center space-x-2">
+         <h1 class="text-3xl font-extrabold bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent tracking-wide">
+  Yatra
+</h1>
+
+
+      </div>
+      <nav class="hidden md:flex space-x-8 font-semibold text-gray-700">
+        <a href="#destinations" class="relative group">
+          <span class="group-hover:text-blue-600 transition duration-300">Destinations</span>
+          <span class="absolute left-0 -bottom-1 w-0 h-0.5 bg-blue-500 group-hover:w-full transition-all duration-300"></span>
+        </a>
+
+        <a href="#tours" class="relative text-yellow-600 font-bold">
+          <span class="px-4 py-1 bg-yellow-100 border border-yellow-400 rounded-full shadow-sm hover:bg-yellow-400 hover:text-white transition duration-300">
+            Tour Packages
+          </span>
+        </a>
+
+        <a href="#why-yatra" class="relative group">
+          <span class="group-hover:text-blue-600 transition duration-300">Why Go with Yatra</span>
+          <span class="absolute left-0 -bottom-1 w-0 h-0.5 bg-blue-500 group-hover:w-full transition-all duration-300"></span>
+        </a>
+
+        <a href="#faqs" class="relative group">
+          <span class="group-hover:text-blue-600 transition duration-300">FAQs</span>
+          <span class="absolute left-0 -bottom-1 w-0 h-0.5 bg-blue-500 group-hover:w-full transition-all duration-300"></span>
+        </a>
+
+        <a href="#reviews" class="relative group">
+          <span class="group-hover:text-blue-600 transition duration-300">Reviews</span>
+          <span class="absolute left-0 -bottom-1 w-0 h-0.5 bg-blue-500 group-hover:w-full transition-all duration-300"></span>
+        </a>
+      </nav>
+
+    
+    
+
+<div class="flex items-center">
+  <button onclick="window.location.href='login.html'"
+    class="flex items-center space-x-2 px-5 py-2 bg-gradient-to-r from-blue-600 to-blue-500 
+           text-white rounded-full hover:from-blue-700 hover:to-blue-600 
+           transition-all duration-300 font-semibold shadow-md hover:scale-105">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+         stroke-width="2.2" stroke="currentColor" class="w-5 h-5">
+      <path stroke-linecap="round" stroke-linejoin="round" 
+            d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.5 20.25a8.25 8.25 0 1115 0v.75H4.5v-.75z" />
+    </svg>
+    <span>Login / Sign Up</span>
+  </button>
+</div>
+
+</header>
+ 
+
+<section class="relative bg-cover bg-center h-[600px]" style="background-image: url('https://i.pinimg.com/1200x/0c/52/ae/0c52ae9947137589b5574a0a515bc451.jpg');">
+
+  <div class="absolute inset-0 bg-black/50"></div>
+
+  
+  <div class="relative z-10 flex items-center h-full px-8 md:px-20">
+    <div class="max-w-xl text-white space-y-6">
+     
+      <h2 class="text-5xl font-bold leading-tight">
+        Enjoy Your Journey <br />
+        <span class="text-blue-400">Travel Safely</span>
+      </h2>
+
+     
+      <p class="text-lg text-gray-200">
+        Whether it’s <span class="text-blue-300 font-semibold">Kerala</span>,
+        <span class="text-blue-300 font-semibold">Uttar Pradesh</span>, or
+        <span class="text-blue-300 font-semibold">Meghalaya</span> —
+        Yatra makes your travel planning easy, fast, and fully online.
+      </p>
+  
+      
+      
+      <div class="flex items-center space-x-3 mt-4">
+        <img src="https://i.pinimg.com/736x/46/db/9e/46db9ee3d4b3323457222bb8db7f3b42.jpg" alt="Users" class="w-10 h-10 rounded-full border-2 border-white object-cover" />
+        <p class="text-gray-100 text-sm">Over <span class="font-semibold text-blue-300">1000+ users</span> used Yatra for their booking</p>
+      </div>
+    </div>
+  </div>
+</section>
+<!--Destinations.......................................................................-->
+<section class="relative px-6 py-20 bg-cover bg-center bg-fixed overflow-hidden" 
+         style="background-image: url('https://i.pinimg.com/1200x/9c/cf/0d/9ccf0d9c2299714ff838f07766649a88.jpg');"
+         id="destinations">
+
+  
+  <div class="absolute inset-0 bg-gradient-to-br from-blue-100/80 via-indigo-100/80 to-purple-100/80"></div>
+
+  
+  <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/white-diamond.png')] opacity-30 pointer-events-none"></div>
+
+  
+  <h2 class="relative text-5xl font-extrabold text-center mb-14 text-gray-800 tracking-tight z-10">
+    Popular <span class="text-blue-600">Destinations</span>
+  </h2>
+
+  <div class="relative max-w-7xl mx-auto z-10">
+
+   
+    <div id="destinationSlider"
+         class="flex space-x-8 overflow-x-auto scroll-smooth snap-x snap-mandatory px-10 py-6"
+         style="scrollbar-width: none; -ms-overflow-style: none;">
+      <style>
+        
+        #destinationSlider::-webkit-scrollbar { display: none; }
+      </style>
+
+     
+      <div class="min-w-[280px] sm:min-w-[320px] bg-white/70 backdrop-blur-md rounded-3xl shadow-xl overflow-hidden snap-center transform transition-all duration-500 hover:scale-105 group">
+        <img src="images/goa.jpg" alt="Goa"
+             class="w-full h-52 object-cover transition-transform duration-700 group-hover:scale-110">
+        <div class="p-5">
+          <h3 class="text-2xl font-semibold mb-2 text-gray-800 group-hover:text-blue-600">Goa</h3>
+          <p class="text-gray-600 text-sm leading-relaxed">
+            Beautiful beaches, vibrant nightlife, and Portuguese heritage make Goa a perfect tropical getaway.
+          </p>
+        </div>
+      </div>
+
+   
+      <div class="min-w-[280px] sm:min-w-[320px] bg-white/70 backdrop-blur-md rounded-3xl shadow-xl overflow-hidden snap-center transform transition-all duration-500 hover:scale-105 group">
+        <img src="images/kerala.jpg" alt="Kerala"
+             class="w-full h-52 object-cover transition-transform duration-700 group-hover:scale-110">
+        <div class="p-5">
+          <h3 class="text-2xl font-semibold mb-2 text-gray-800 group-hover:text-blue-600">Kerala</h3>
+          <p class="text-gray-600 text-sm leading-relaxed">
+            Serene backwaters, lush greenery, and rejuvenating Ayurveda experiences.
+          </p>
+        </div>
+      </div>
+
+     
+      <div class="min-w-[280px] sm:min-w-[320px] bg-white/70 backdrop-blur-md rounded-3xl shadow-xl overflow-hidden snap-center transform transition-all duration-500 hover:scale-105 group">
+        <img src="images/rajasthan.jpg" alt="Rajasthan"
+             class="w-full h-52 object-cover transition-transform duration-700 group-hover:scale-110">
+        <div class="p-5">
+          <h3 class="text-2xl font-semibold mb-2 text-gray-800 group-hover:text-blue-600">Rajasthan</h3>
+          <p class="text-gray-600 text-sm leading-relaxed">
+            Explore majestic forts, royal palaces, and vibrant desert culture.
+          </p>
+        </div>
+      </div>
+
+      
+      <div class="min-w-[280px] sm:min-w-[320px] bg-white/70 backdrop-blur-md rounded-3xl shadow-xl overflow-hidden snap-center transform transition-all duration-500 hover:scale-105 group">
+        <img src="images/himachal.jpg" alt="Himachal Pradesh"
+             class="w-full h-52 object-cover transition-transform duration-700 group-hover:scale-110">
+        <div class="p-5">
+          <h3 class="text-2xl font-semibold mb-2 text-gray-800 group-hover:text-blue-600">Himachal Pradesh</h3>
+          <p class="text-gray-600 text-sm leading-relaxed">
+            Snow peaks, adventure sports, and charming hill towns like Manali and Shimla.
+          </p>
+        </div>
+      </div>
+
+      
+      <div class="min-w-[280px] sm:min-w-[320px] bg-white/70 backdrop-blur-md rounded-3xl shadow-xl overflow-hidden snap-center transform transition-all duration-500 hover:scale-105 group">
+        <img src="images/mumbai-goa.jpg" alt="Mumbai"
+             class="w-full h-52 object-cover transition-transform duration-700 group-hover:scale-110">
+        <div class="p-5">
+          <h3 class="text-2xl font-semibold mb-2 text-gray-800 group-hover:text-blue-600">Mumbai</h3>
+          <p class="text-gray-600 text-sm leading-relaxed">
+            The city that never sleeps — Gateway of India, Marine Drive, and Bollywood.
+          </p>
+        </div>
+      </div>
+
+      <div class="min-w-[280px] sm:min-w-[320px] bg-white/70 backdrop-blur-md rounded-3xl shadow-xl overflow-hidden snap-center transform transition-all duration-500 hover:scale-105 group">
+        <img src="https://i.pinimg.com/736x/d4/c5/a5/d4c5a5b61d9aa94d8be69527630e4284.jpg" alt="Kashmir"
+             class="w-full h-52 object-cover transition-transform duration-700 group-hover:scale-110">
+        <div class="p-5">
+          <h3 class="text-2xl font-semibold mb-2 text-gray-800 group-hover:text-blue-600">Kashmir</h3>
+          <p class="text-gray-600 text-sm leading-relaxed">
+            Dal Lake, snow-clad mountains, and apple orchards.
+          </p>
+        </div>
+      </div>
+
+   
+      <div class="min-w-[280px] sm:min-w-[320px] bg-white/70 backdrop-blur-md rounded-3xl shadow-xl overflow-hidden snap-center transform transition-all duration-500 hover:scale-105 group">
+        <img src="https://i.pinimg.com/736x/9e/f7/7a/9ef77a11cad680cb3b06cea93a2c4cdb.jpg" alt="Meghalaya"
+             class="w-full h-52 object-cover transition-transform duration-700 group-hover:scale-110">
+        <div class="p-5">
+          <h3 class="text-2xl font-semibold mb-2 text-gray-800 group-hover:text-blue-600">Meghalaya</h3>
+          <p class="text-gray-600 text-sm leading-relaxed">
+            Lush forests, living root bridges, and scenic waterfalls.
+          </p>
+        </div>
+      </div>
+
+      <div class="min-w-[280px] sm:min-w-[320px] bg-white/70 backdrop-blur-md rounded-3xl shadow-xl overflow-hidden snap-center transform transition-all duration-500 hover:scale-105 group">
+        <img src="images/tamilnadu.jpg" alt="Tamil Nadu"
+             class="w-full h-52 object-cover transition-transform duration-700 group-hover:scale-110">
+        <div class="p-5">
+          <h3 class="text-2xl font-semibold mb-2 text-gray-800 group-hover:text-blue-600">Tamil Nadu</h3>
+          <p class="text-gray-600 text-sm leading-relaxed">
+            Ancient temples, classical dance, and coastal beauty.
+          </p>
+        </div>
+      </div>
+
+   
+      <div class="min-w-[280px] sm:min-w-[320px] bg-white/70 backdrop-blur-md rounded-3xl shadow-xl overflow-hidden snap-center transform transition-all duration-500 hover:scale-105 group">
+        <img src="images/ladakh.jpg" alt="Ladakh"
+             class="w-full h-52 object-cover transition-transform duration-700 group-hover:scale-110">
+        <div class="p-5">
+          <h3 class="text-2xl font-semibold mb-2 text-gray-800 group-hover:text-blue-600">Ladakh</h3>
+          <p class="text-gray-600 text-sm leading-relaxed">
+            High-altitude monasteries, rugged landscapes, and clear skies.
+          </p>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</section>
+
+<!--///////////////////////////////TOUR PACKAGES SECTION////////////////////////////-->
+<section id="tours" class="relative px-8 py-20 bg-gradient-to-br from-blue-50 via-indigo-100 to-blue-200 overflow-hidden">
+  <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/white-diamond.png')] opacity-40 pointer-events-none"></div>
+
+  <!-- Section Heading -->
+  <div class="relative text-center mb-16">
+    <h2 class="text-5xl font-extrabold text-gray-800 tracking-tight">
+      <span class="text-blue-700">Tour</span> Packages
+    </h2>
+    <p class="text-gray-600 text-lg mt-3 max-w-2xl mx-auto">
+      Discover our handpicked travel experiences across India — from serene backwaters to majestic mountains.
+    </p>
+    <div class="mt-4 w-32 h-1 bg-gradient-to-r from-blue-600 to-indigo-600 mx-auto rounded-full"></div>
+  </div>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" integrity="sha512-…" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  
+  <div class="relative grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-10 z-10">
+
+ 
+    <div class="group relative bg-white/80 backdrop-blur-md rounded-3xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 flex flex-col">
+      <img src="images/golden-triangle.jpg" alt="Golden Triangle Tour" class="w-full h-52 object-cover transition-transform duration-700 group-hover:scale-110">
+      <div class="p-6 flex flex-col flex-grow">
+        <h3 class="text-2xl font-semibold mb-2 text-gray-900 group-hover:text-blue-700 transition-colors">Golden Triangle Tour</h3>
+        <p class="text-gray-600 text-sm mb-4 flex-grow leading-relaxed">
+          Explore Delhi, Agra, and Jaipur — experience royal palaces, Mughal heritage, and the Taj Mahal.
+        </p>
+        <div class="flex items-center justify-between text-sm text-gray-600 mb-3">
+          <div class="flex items-center space-x-1 text-yellow-500">
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star-half-alt"></i>
+          </div>
+          <span class="text-gray-500">120+ booked</span>
+        </div>
+        <div class="text-gray-500 text-sm mb-5">Duration: 7 Days | ₹25,000 per person</div>
+        <button onclick=" window.location.href = 'login.html';" class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-indigo-700 hover:to-blue-700 text-white font-semibold py-2.5 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg w-full">
+          Book Now
+        </button>
+      </div>
+    </div>
+
+
+    <div class="group relative bg-white/80 backdrop-blur-md rounded-3xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 flex flex-col">
+      <img src="images/kerala-backwaters.jpg" alt="Kerala Backwaters" class="w-full h-52 object-cover transition-transform duration-700 group-hover:scale-110">
+      <div class="p-6 flex flex-col flex-grow">
+        <h3 class="text-2xl font-semibold mb-2 text-gray-900 group-hover:text-blue-700 transition-colors">Kerala Backwaters</h3>
+        <p class="text-gray-600 text-sm mb-4 flex-grow leading-relaxed">
+          Cruise through serene lagoons, lush palm-fringed canals, and stay in traditional houseboats.
+        </p>
+        <div class="flex items-center justify-between text-sm text-gray-600 mb-3">
+          <div class="flex items-center space-x-1 text-yellow-500">
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star-half-alt"></i>
+          </div>
+          <span class="text-gray-500">95+ booked</span>
+        </div>
+        <div class="text-gray-500 text-sm mb-5">Duration: 5 Days | ₹18,000 per person</div>
+        <button onclick=" window.location.href = 'login.html';" class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-indigo-700 hover:to-blue-700 text-white font-semibold py-2.5 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg w-full">
+          Book Now
+        </button>
+      </div>
+    </div>
+
+    
+    <div class="group relative bg-white/80 backdrop-blur-md rounded-3xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 flex flex-col">
+      <img src="images/goa-tour.jpg" alt="Goa Beach Holiday" class="w-full h-52 object-cover transition-transform duration-700 group-hover:scale-110">
+      <div class="p-6 flex flex-col flex-grow">
+        <h3 class="text-2xl font-semibold mb-2 text-gray-900 group-hover:text-blue-700 transition-colors">Goa Beach Holiday</h3>
+        <p class="text-gray-600 text-sm mb-4 flex-grow leading-relaxed">
+          Relax on sun-kissed beaches, try water sports, and explore the vibrant nightlife of Goa.
+        </p>
+        <div class="flex items-center justify-between text-sm text-gray-600 mb-3">
+          <div class="flex items-center space-x-1 text-yellow-500">
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star-half-alt"></i>
+          </div>
+          <span class="text-gray-500">150+ booked</span>
+        </div>
+        <div class="text-gray-500 text-sm mb-5">Duration: 4 Days | ₹15,000 per person</div>
+        <button onclick=" window.location.href = 'login.html';" class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-indigo-700 hover:to-blue-700 text-white font-semibold py-2.5 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg w-full">
+          Book Now
+        </button>
+      </div>
+    </div>
+
+   
+    <div class="group relative bg-white/80 backdrop-blur-md rounded-3xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 flex flex-col">
+      <img src="images/himalayan.jpg" alt="Himalayan Adventure" class="w-full h-52 object-cover transition-transform duration-700 group-hover:scale-110">
+      <div class="p-6 flex flex-col flex-grow">
+        <h3 class="text-2xl font-semibold mb-2 text-gray-900 group-hover:text-blue-700 transition-colors">Himalayan Adventure</h3>
+        <p class="text-gray-600 text-sm mb-4 flex-grow leading-relaxed">
+          Trek through majestic mountains, visit ancient monasteries, and breathe the Himalayan air.
+        </p>
+        <div class="flex items-center justify-between text-sm text-gray-600 mb-3">
+          <div class="flex items-center space-x-1 text-yellow-500">
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star-half-alt"></i>
+          </div>
+          <span class="text-gray-500">80+ booked</span>
+        </div>
+        <div class="text-gray-500 text-sm mb-5">Duration: 10 Days | ₹35,000 per person</div>
+        <button  onclick=" window.location.href = 'login.html';"class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-indigo-700 hover:to-blue-700 text-white font-semibold py-2.5 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg w-full">
+          Book Now
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-blue-200/80 to-transparent pointer-events-none"></div>
+</section>
+<!--//////////////////////////////////////////////why-yatra//////////////////////////////////////-->
+<section id="why-yatra" style="
+  background: url('https://i.pinimg.com/1200x/4d/0b/e8/4d0be83613420646d272cf85ac99b1a4.jpg') no-repeat center/cover;
+  padding: 80px 20px;
+  color: #fff;
+  font-family: 'Poppins', sans-serif;
+">
+  <div style="max-width:1200px; margin:0 auto; display:flex; flex-wrap:wrap; align-items:center; gap:40px;">
+
+    <div style="flex:1 1 500px; min-width:300px;">
+      <h2 style="font-size:2.5em; margin-bottom:20px; line-height:1.2;">
+        Why Travel with <span style="color:#3b82f6;">Yatra</span>
+      </h2>
+      <p style="font-size:1.1em; opacity:0.9; margin-bottom:40px; font-weight:400;">
+        Discover seamless journeys across India — expertly planned itineraries, transparent pricing, and dedicated support so you can immerse in the experience, not the arrangements.
+      </p>
+
+      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(240px,1fr)); gap:30px;">
+
+      
+        <div style="background:rgba(0,0,0,0.5); padding:30px; border-radius:12px; transition: transform 0.3s ease, background 0.3s ease;">
+          <div style="font-size:3em; margin-bottom:15px; color:#3b82f6;">
+            <i class="fas fa-route" aria-hidden="true"></i>
+          </div>
+          <h4 style="margin:0 0 10px; font-size:1.3em; font-weight:500;">Tailor-Made Trips</h4>
+          <p style="opacity:0.85; font-weight:400;">
+            Choose from curated packages or request custom routes – whether you’re seeking heritage, adventure, or a relaxed holiday, we’ve got you covered.
+          </p>
+        </div>
+
+        <div style="background:rgba(0,0,0,0.5); padding:30px; border-radius:12px; transition: transform 0.3s ease, background 0.3s ease;">
+          <div style="font-size:3em; margin-bottom:15px; color:#3b82f6;">
+            <i class="fas fa-wallet" aria-hidden="true"></i>
+          </div>
+          <h4 style="margin:0 0 10px; font-size:1.3em; font-weight:500;">Transparent Pricing</h4>
+          <p style="opacity:0.85; font-weight:400;">
+            What you see is what you pay – clear breakdowns, no hidden fees, and the best value for your travel experience across India.
+          </p>
+        </div>
+
+      
+        <div style="background:rgba(0,0,0,0.5); padding:30px; border-radius:12px; transition: transform 0.3s ease, background 0.3s ease;">
+          <div style="font-size:3em; margin-bottom:15px; color:#3b82f6;">
+            <i class="fas fa-headset" aria-hidden="true"></i>
+          </div>
+          <h4 style="margin:0 0 10px; font-size:1.3em; font-weight:500;">Anytime Support</h4>
+          <p style="opacity:0.85; font-weight:400;">
+            From planning to the final memory – our support team is available around the clock to assist you on your journey.
+          </p>
+        </div>
+
+       
+        <div style="background:rgba(0,0,0,0.5); padding:30px; border-radius:12px; transition: transform 0.3s ease, background 0.3s ease;">
+          <div style="font-size:3em; margin-bottom:15px; color:#3b82f6;">
+            <i class="fas fa-map-pin" aria-hidden="true"></i>
+          </div>
+          <h4 style="margin:0 0 10px; font-size:1.3em; font-weight:500;">Authentic Local Experiences</h4>
+          <p style="opacity:0.85; font-weight:400;">
+            Dive into India’s true essence – we link you to trusted local guides, lesser-known spots & genuine experiences beyond the typical tourist trail.
+          </p>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <style>
+    
+    #why-yatra .fas {
+      display: block;
+    }
+    #why-yatra div[style*="background:rgba(0,0,0,0.5)"] {
+      cursor: default;
+    }
+    #why-yatra div[style*="background:rgba(0,0,0,0.5)"]:hover {
+      background: rgba(59,130,246,0.1);
+      transform: translateY(-8px);
+    }
+
+    @media (max-width:768px) {
+      #why-yatra {
+        padding: 60px 15px;
+      }
+      #why-yatra > div > div {
+        flex:1 1 100%;
+        text-align:center;
+      }
+      #why-yatra > div > div:nth-child(1) {
+        order:2;
+      }
+      #why-yatra > div > div:nth-child(2) {
+        order:1;
+      }
+    }
+  </style>
+
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+</section>
+
+<!-- /////////////////////////////faqs///////////////////////////////////-->
+<section class="bg-white py-16 px-6" id="faqs">
+  <div class="max-w-5xl mx-auto flex flex-wrap lg:flex-nowrap gap-12 items-start">
+
+  
+    <div class="w-full lg:w-1/3 text-center lg:text-left
+                bg-[url('https://i.pinimg.com/736x/4b/b9/d8/4bb9d8d9eedd86d19e5b1abaedf14249.jpg')] bg-cover bg-center rounded-lg
+                p-8
+                text-white
+                relative"
+         style="min-height: 300px;">
+      <h2 class="text-3xl font-bold mb-4">Frequently Asked Questions</h2>
+      <p class="text-gray-200 mb-6">Everything about exploring and booking trips on Yatra</p>
+      <div class="absolute inset-0 bg-black/30 rounded-lg pointer-events-none"></div>
+    </div>
+
+  
+    <div class="w-full lg:w-2/3 space-y-4">
+
+      
+      <div class="border border-gray-200 rounded-lg overflow-hidden">
+        <button type="button"
+                class="w-full flex justify-between items-center p-5 text-left text-lg font-medium text-gray-700 bg-gray-50 hover:bg-gray-100"
+                onclick="toggleFaq(this)">
+          <span>How can I explore trips on Yatra?</span>
+          <svg class="w-6 h-6 transform transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+        <div class="max-h-0 overflow-hidden transition-max-height duration-300 ease-in-out bg-white">
+          <div class="p-5 text-gray-600">
+            You can browse all available trips directly on Yatra’s dashboard — filter by region, category, or price to find the perfect travel experience.
+          </div>
+        </div>
+      </div>
+
+     
+      <div class="border border-gray-200 rounded-lg overflow-hidden">
+        <button type="button"
+                class="w-full flex justify-between items-center p-5 text-left text-lg font-medium text-gray-700 bg-gray-50 hover:bg-gray-100"
+                onclick="toggleFaq(this)">
+          <span>How do I book a trip?</span>
+          <svg class="w-6 h-6 transform transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+        <div class="max-h-0 overflow-hidden transition-max-height duration-300 ease-in-out bg-white">
+          <div class="p-5 text-gray-600">
+            Once you’ve selected your trip, click on “Book Now,” enter your travel details, and proceed to secure payment. Your booking will be confirmed instantly.
+          </div>
+        </div>
+      </div>
+
+     
+      <div class="border border-gray-200 rounded-lg overflow-hidden">
+        <button type="button"
+                class="w-full flex justify-between items-center p-5 text-left text-lg font-medium text-gray-700 bg-gray-50 hover:bg-gray-100"
+                onclick="toggleFaq(this)">
+          <span>Can I view my previous bookings?</span>
+          <svg class="w-6 h-6 transform transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+        <div class="max-h-0 overflow-hidden transition-max-height duration-300 ease-in-out bg-white">
+          <div class="p-5 text-gray-600">
+            Yes! After logging in, go to the “My Bookings” section to view all your upcoming and past trip reservations in one place.
+          </div>
+        </div>
+      </div>
+
+      
+      <div class="border border-gray-200 rounded-lg overflow-hidden">
+        <button type="button"
+                class="w-full flex justify-between items-center p-5 text-left text-lg font-medium text-gray-700 bg-gray-50 hover:bg-gray-100"
+                onclick="toggleFaq(this)">
+          <span>What payment methods are supported?</span>
+          <svg class="w-6 h-6 transform transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+        <div class="max-h-0 overflow-hidden transition-max-height duration-300 ease-in-out bg-white">
+          <div class="p-5 text-gray-600">
+            Yatra supports  payment options through debit/credit cards. All payments are processed securely.
+          </div>
+        </div>
+      </div>
+
+
+    </div>
+  </div>
+
+  <script>
+    function toggleFaq(button) {
+      const answerDiv = button.nextElementSibling;
+      const icon = button.querySelector('svg');
+      const isOpen = answerDiv.style.maxHeight && answerDiv.style.maxHeight !== '0px';
+      if (isOpen) {
+        answerDiv.style.maxHeight = null;
+        icon.classList.remove('rotate-180');
+      } else {
+        answerDiv.style.maxHeight = answerDiv.scrollHeight + 'px';
+        icon.classList.add('rotate-180');
+      }
+    }
+  </script>
+</section>
+
+<!-- Blogs Section -->
+<section id="blogs" class="bg-white py-20 px-6">
+  <div class="max-w-7xl mx-auto">
+    <h2 class="text-4xl font-extrabold text-center text-gray-800 mb-12">Latest From Our Blog</h2>
+    <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+      
+      <!-- Blog Card 1 -->
+      <article class="blog-card bg-gray-50 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-shadow duration-300">
+        <img src="https://i.pinimg.com/1200x/e5/07/bd/e507bd4266c581640bb6593dae1802a6.jpg" alt="Blog Post 1" class="w-full h-48 object-cover">
+        <div class="p-6">
+          <p class="text-sm text-blue-600 uppercase mb-2">Travel Tips</p>
+          <h3 class="text-2xl font-semibold mb-3 text-gray-800">How to Plan the Perfect Beach Holiday</h3>
+          <p class="text-gray-600 mb-4">From choosing the right destination to packing smart—everything you need to know for a sun-soaked escape.</p>
+          
+          <div class="full-content hidden text-gray-600 mb-4">
+            <p>A beach holiday offers sunshine, salt air, and relaxation — but good planning ensures you get the most out of it.</p>
+            <p><strong>Choose the right destination.</strong> Pick a beach that fits your needs (family-friendly vs adventure vs quiet). Look up amenities, crowd levels, seasonality.</p>
+            <p><strong>Book accommodation early.</strong> Popular beach spots fill fast — booking ahead often gets better rates and better rooms.</p>
+            <p><strong>Plan your activities.</strong> Decide whether you’ll relax, snorkel, surf, explore. Pack accordingly.</p>
+            <p><strong>Packing essentials.</strong> Don’t overlook sun-protection (high-SPF sunscreen, hats, sunglasses), quick-dry towels, insect repellent, etc.</p>
+            <p><strong>Choose the right season & shoulder time.</strong> Avoid peak crowding and high prices by picking less busy seasons where possible.</p>
+            <p>With a little thought ahead (destination + timing + packing), your beach holiday becomes not just relaxing but memorable.</p>
+          </div>
+          
+          <a href="#" class="read-more inline-block text-blue-600 font-medium hover:underline">Read More →</a>
+        </div>
+      </article>
+
+      <!-- Blog Card 2 -->
+      <article class="blog-card bg-gray-50 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-shadow duration-300">
+        <img src="https://i.pinimg.com/736x/aa/50/14/aa501473e33b5bba6a9c70cacc5c0eff.jpg" alt="Blog Post 2" class="w-full h-48 object-cover">
+        <div class="p-6">
+          <p class="text-sm text-blue-600 uppercase mb-2">Destination Guide</p>
+          <h3 class="text-2xl font-semibold mb-3 text-gray-800">Top Hill Stations to Visit in India</h3>
+          <p class="text-gray-600 mb-4">Chill out in the mountains: discover scenic towns, best seasons, and travel tips for your getaway.</p>
+
+          <div class="full-content hidden text-gray-600 mb-4">
+            <p>Escape the heat, breathe fresh air, and enjoy scenic mountains. India’s hill stations offer this and more.</p>
+            <p><strong>Choosing your hill station.</strong> Consider travel time, climate, crowd levels, activities.</p>
+            <p><strong>Examples of great hill stations:</strong></p>
+            <ul class="list-disc list-inside">
+              <li>Darjeeling (West Bengal) – tea plantations, Himalayan views.</li>
+              <li>Coorg (Karnataka) – misty valleys and spice farms.</li>
+              <li>Manali, Shimla (Himachal Pradesh) – adventure, snow, chill.</li>
+            </ul>
+            <p><strong>Best time to visit & activities.</strong> Depends on whether you want summer retreat, monsoon greenery or winter snow — adapt accordingly.</p>
+            <p>Whether for relaxation or adventure, picking the right hill station with a bit of homework makes all the difference.</p>
+          </div>
+
+          <a href="#" class="read-more inline-block text-blue-600 font-medium hover:underline">Read More →</a>
+        </div>
+      </article>
+
+      <!-- Blog Card 3 -->
+      <article class="blog-card bg-gray-50 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-shadow duration-300">
+        <img src="https://i.pinimg.com/1200x/73/e3/77/73e377ff20600b3cb5eef3b039c49b1c.jpg" alt="Blog Post 3" class="w-full h-48 object-cover">
+        <div class="p-6">
+          <p class="text-sm text-blue-600 uppercase mb-2">Travel Hacks</p>
+          <h3 class="text-2xl font-semibold mb-3 text-gray-800">Smart Ways to Save on Your Flights</h3>
+          <p class="text-gray-600 mb-4">Budget friendly travel doesn’t mean missing out. Learn how to find deals, avoid hidden fees and fly smarter.</p>
+
+          <div class="full-content hidden text-gray-600 mb-4">
+            <p>Flights often take up a big chunk of travel budget — but with savvy tactics you can significantly reduce costs.</p>
+            <p><strong>Key strategies:</strong></p>
+            <ul class="list-disc list-inside">
+              <li>Use <em>incognito mode</em> or clear cookies while searching — some sites may raise fares when they detect frequent searches.</li>
+              <li>Be <em>flexible with travel dates</em> — shifting your trip by a day or choosing mid-week can lower fares.</li>
+              <li>Compare fares across currencies, routes, and booking platforms.</li>
+            </ul>
+            <p><strong>Bonus tips:</strong></p>
+            <ul class="list-disc list-inside">
+              <li>Set price alerts on booking apps so you get notified when fares drop.</li>
+              <li>Consider alternative airports or one-way bookings to unlock better deals.</li>
+            </ul>
+            <p>With planning and a few little hacks, you’ll fly smarter — spend less on airfare, and free up budget for better experiences at your destination.</p>
+          </div>
+
+          <a href="#" class="read-more inline-block text-blue-600 font-medium hover:underline">Read More →</a>
+        </div>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<style>
+/* Minimal CSS */
+
+.blog-card .read-more {
+  cursor: pointer;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  document.querySelectorAll('.blog-card').forEach(function(card){
+    const btn = card.querySelector('.read-more');
+    const full = card.querySelector('.full-content');
+    btn.addEventListener('click', function(e){
+      e.preventDefault();
+      if (full.classList.contains('hidden')) {
+        full.classList.remove('hidden');
+        btn.textContent = 'Show Less ←';
+      } else {
+        full.classList.add('hidden');
+        btn.textContent = 'Read More →';
+      }
+    });
+  });
+});
+</script>
+
+
+<!-- Reviews Section -->
+<section id="reviews" class="relative bg-cover bg-center bg-fixed py-20 px-6" 
+         style="background-image: url('https://i.pinimg.com/1200x/99/a6/c5/99a6c5c0967a34a1a293239afa908caf.jpg');">
+
+  <!-- Overlay for readability -->
+  <div class="absolute inset-0 bg-black/40"></div>
+
+  <div class="relative max-w-7xl mx-auto text-white">
+    <h2 class="text-4xl font-extrabold text-center mb-12">What Our Travellers Say</h2>
+    <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+
+      <!-- Review Card 1 -->
+      <div class="bg-white/90 text-gray-800 rounded-2xl p-6 shadow-lg">
+        <div class="flex items-center mb-4">
+          <img class="w-14 h-14 rounded-full object-cover mr-4" src="https://i.pinimg.com/736x/27/90/03/27900371354079f41e16751f2a320fdb.jpg" alt="Traveller 1">
+          <div>
+            <h4 class="text-lg font-semibold">Aarav Sharma</h4>
+            <div class="flex items-center text-amber-500">
+              <svg class="w-5 h-5 fill-current" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.124-6.545L.49 6.91l6.56-.955L10 0l2.95 5.954 6.56.955-4.756 4.635 1.124 6.545z"/></svg>
+              <svg class="w-5 h-5 fill-current" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.124-6.545L.49 6.91l6.56-.955L10 0l2.95 5.954 6.56.955-4.756 4.635 1.124 6.545z"/></svg>
+              <svg class="w-5 h-5 fill-current" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.124-6.545L.49 6.91l6.56-.955L10 0l2.95 5.954 6.56.955-4.756 4.635 1.124 6.545z"/></svg>
+              <svg class="w-5 h-5 fill-current" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.124-6.545L.49 6.91l6.56-.955L10 0l2.95 5.954 6.56.955-4.756 4.635 1.124 6.545z"/></svg>
+              <svg class="w-5 h-5 fill-current text-gray-300" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.124-6.545L.49 6.91l6.56-.955L10 0l2.95 5.954 6.56.955-4.756 4.635 1.124 6.545z"/></svg>
+            </div>
+          </div>
+        </div>
+        <p class="leading-relaxed">
+          “Booking my Goa trip through Yatra was effortless and fun. The team handled everything—from flights to sea-sight to beach stay. Highly recommend!”
+        </p>
+      </div>
+
+      <!-- Review Card 2 -->
+      <div class="bg-white/90 text-gray-800 rounded-2xl p-6 shadow-lg">
+        <div class="flex items-center mb-4">
+          <img class="w-14 h-14 rounded-full object-cover mr-4" src="https://i.pinimg.com/1200x/eb/16/a7/eb16a71a1038107f9f625459f04a31de.jpg" alt="Traveller 2">
+          <div>
+            <h4 class="text-lg font-semibold">Meera Patel</h4>
+            <div class="flex items-center text-amber-500">
+              <svg class="w-5 h-5 fill-current" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.124-6.545L.49 6.91l6.56-.955L10 0l2.95 5.954 6.56.955-4.756 4.635 1.124 6.545z"/></svg>
+              <svg class="w-5 h-5 fill-current" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.124-6.545L.49 6.91l6.56-.955L10 0l2.95 5.954 6.56.955-4.756 4.635 1.124 6.545z"/></svg>
+              <svg class="w-5 h-5 fill-current" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.124-6.545L.49 6.91l6.56-.955L10 0l2.95 5.954 6.56.955-4.756 4.635 1.124 6.545z"/></svg>
+              <svg class="w-5 h-5 fill-current text-gray-300" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.124-6.545L.49 6.91l6.56-.955L10 0l2.95 5.954 6.56.955-4.756 4.635 1.124 6.545z"/></svg>
+              <svg class="w-5 h-5 fill-current text-gray-300" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.124-6.545L.49 6.91l6.56-.955L10 0l2.95 5.954 6.56.955-4.756 4.635 1.124 6.545z"/></svg>
+            </div>
+          </div>
+        </div>
+        <p class="leading-relaxed">
+          “Yatra’s support team was always available when we had a last-minute change. Smooth and stress-free experience.”
+        </p>
+      </div>
+
+      <!-- Review Card 3 -->
+      <div class="bg-white/90 text-gray-800 rounded-2xl p-6 shadow-lg">
+        <div class="flex items-center mb-4">
+          <img class="w-14 h-14 rounded-full object-cover mr-4" src="https://i.pinimg.com/736x/6e/7d/9d/6e7d9d8a15b47ace4a5e0abc7a10434c.jpg" alt="Traveller 3">
+          <div>
+            <h4 class="text-lg font-semibold">Rohan Verma</h4>
+            <div class="flex items-center text-amber-500">
+              <svg class="w-5 h-5 fill-current" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.124-6.545L.49 6.91l6.56-.955L10 0l2.95 5.954 6.56.955-4.756 4.635 1.124 6.545z"/></svg>
+              <svg class="w-5 h-5 fill-current" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.124-6.545L.49 6.91l6.56-.955L10 0l2.95 5.954 6.56.955-4.756 4.635 1.124 6.545z"/></svg>
+              <svg class="w-5 h-5 fill-current text-gray-300" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.124-6.545L.49 6.91l6.56-.955L10 0l2.95 5.954 6.56.955-4.756 4.635 1.124 6.545z"/></svg>
+              <svg class="w-5 h-5 fill-current text-gray-300" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.124-6.545L.49 6.91l6.56-.955L10 0l2.95 5.954 6.56.955-4.756 4.635 1.124 6.545z"/></svg>
+              <svg class="w-5 h-5 fill-current text-gray-300" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.124-6.545L.49 6.91l6.56-.955L10 0l2.95 5.954 6.56.955-4.756 4.635 1.124 6.545z"/></svg>
+            </div>
+          </div>
+        </div>
+        <p class="leading-relaxed">
+          “Our family holiday to Rajasthan was curated perfectly. Thanks to Yatra for taking care of everything down to the last detail!”
+        </p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+ 
+<!-- Footer Section -->
+<footer style="background: linear-gradient(135deg, #1e3a8a, #3b82f6); color: white; font-family: 'Poppins', sans-serif; padding: 70px 20px; overflow: hidden; position: relative;">
+
+  <!-- Animated Glow Effect -->
+  <div style="position:absolute; top:-100px; left:-100px; width:300px; height:300px; background:rgba(255,255,255,0.1); border-radius:50%; animation: float 6s ease-in-out infinite alternate;"></div>
+  <div style="position:absolute; bottom:-120px; right:-100px; width:300px; height:300px; background:rgba(255,255,255,0.1); border-radius:50%; animation: float 8s ease-in-out infinite alternate-reverse;"></div>
+
+  <div style="max-width:1200px; margin:0 auto; display:flex; flex-wrap:wrap; justify-content:space-between; gap:40px; position:relative; z-index:2;">
+
+    <!-- Brand Info -->
+    <div style="flex:1 1 280px;">
+      <h2 style="font-size:2.2em; font-weight:700; margin-bottom:15px;">Yatra</h2>
+      <p style="opacity:0.9; line-height:1.6;">Yatra simplifies travel arrangements for Indian travellers. From holiday escapes to business trips, we make the process easy, fast, and fully online — no office visits needed.</p>
+      <p style="margin-top:15px;"><i class="fa fa-phone"></i> +91 98xxx xxxxx</p>
+      <p><i class="fa fa-envelope"></i> contact@yatra.com</p>
+      <p>Serving all over India </p>
+    </div>
+
+    <!-- Quick Links -->
+    <div style="flex:1 1 200px;">
+      <h3 style="font-weight:600; font-size:1.3em; margin-bottom:15px;">Quick Links</h3>
+      <ul style="list-style:none; padding:0;">
+        <li><a href="#" class="footer-link">Home</a></li>
+        <li><a href="#destinations" class="footer-link">Destinations</a></li>
+        <li><a href="#tours" class="footer-link">Tour Packages</a></li>
+        <li><a href="#faqs" class="footer-link">FAQ’s</a></li>
+        <li><a href="#blogs" class="footer-link">Blog</a></li>
+      </ul>
+    </div>
+
+    <!-- Other Links Section -->
+<div style="flex:1 1 200px;">
+
+  <h3 style="font-weight:600; font-size:1.3em; margin-bottom:15px;">Other Links</h3>
+
+  <ul style="list-style:none; padding:0;">
+    <li><a href="privacy.html" class="footer-link">Privacy</a></li>
+    <li><a href="terms-conditions.html" class="footer-link">Terms &amp; Conditions</a></li>
+  </ul>
+</div>
+
+
+
+
+
+
+
+  
+    <!-- Social Media -->
+   <div style="flex:1 1 250px;"> 
+    <h3 style="font-weight:600; font-size:1.3em; margin-bottom:15px;">Follow Us</h3> 
+    <div style="display:flex; gap:15px; flex-wrap:wrap;"> 
+      <a href="https://www.facebook.com" class="social-icon"><i class="fab fa-facebook-f"></i></a> 
+      <a href="https://www.instagram.com" class="social-icon"><i class="fab fa-instagram"></i></a>
+       <a href="https://twitter.com" class="social-icon"><i class="fab fa-twitter"></i></a> 
+       <a href="https://www.linkedin.com" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
+        <a href="https://www.youtube.com" class="social-icon"><i class="fab fa-youtube"></i></a> 
+      </div> 
+      <p style="margin-top:35px; font-size:0.9em;">© 2025 Yatra. All rights reserved.</p> 
+      <p style="font-size:0.9em;">Made by Vennela & Sathwika</p> 
+    </div> 
+  </div>
+
+
+  <style>
+    /* Footer Links */
+    .footer-link {
+      color: #e0e7ff;
+      text-decoration: none;
+      display: block;
+      padding: 6px 0;
+      transition: all 0.3s ease;
+    }
+    .footer-link:hover {
+      color: #fff;
+      transform: translateX(5px);
+    }
+
+    /* Social Icons */
+    .social-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background-color: rgba(255, 255, 255, 0.15);
+      color: white;
+      transition: all 0.3s ease;
+      font-size: 18px;
+    }
+    .social-icon:hover {
+      background-color: white;
+      color: #1e3a8a;
+      transform: scale(1.1);
+    }
+
+    /* Floating Animations */
+    @keyframes float {
+      from { transform: translateY(0); }
+      to { transform: translateY(20px); }
+    }
+
+    @media (max-width: 768px) {
+      footer div[style*="flex-wrap"] {
+        flex-direction: column;
+        text-align: center;
+      }
+      .social-icon {
+        margin: 0 auto;
+      }
+    }
+  </style>
+</footer>
+
+<!-- FontAwesome -->
+<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+
+
+
+ <script>
+    const menuBtn = document.getElementById("menu-btn");
+    const mobileMenu = document.getElementById("mobile-menu");
+    menuBtn.addEventListener("click", () => {
+      mobileMenu.classList.toggle("hidden");
+    });
+    const tabLinks = document.querySelectorAll(".tab-link");
+    const tabPanes = document.querySelectorAll(".tab-pane");
+
+    tabLinks.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const target = btn.dataset.tab;
+
+        tabLinks.forEach((b) =>
+          b.classList.remove("bg-blue-600", "text-white")
+        );
+        btn.classList.add("bg-blue-600", "text-white");
+
+        tabPanes.forEach((pane) => {
+          pane.classList.add("hidden");
+          pane.classList.remove("active");
+        });
+
+        document.getElementById(target).classList.remove("hidden");
+        document.getElementById(target).classList.add("active");
+      });
+    });
+        document.getElementById('heroBtn').addEventListener('click', () => {
+    document.getElementById('destinations').scrollIntoView({ behavior: 'smooth' });
+  });
+
+
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const slider = document.getElementById('destinationSlider');
+    const btnLeft = document.getElementById('scrollLeft');
+    const btnRight = document.getElementById('scrollRight');
+
+    if (!slider || !btnLeft || !btnRight) return;
+
+    // compute a sensible scroll step (70% of visible slider width)
+    const getScrollStep = () => Math.round(slider.clientWidth * 0.7);
+
+    // update button disabled states (optional visual feedback)
+    const updateButtons = () => {
+      btnLeft.disabled = slider.scrollLeft <= 0;
+      btnRight.disabled = Math.ceil(slider.scrollLeft + slider.clientWidth) >= slider.scrollWidth;
+
+      btnLeft.style.opacity = btnLeft.disabled ? '0.5' : '1';
+      btnRight.style.opacity = btnRight.disabled ? '0.5' : '1';
+      btnLeft.style.pointerEvents = btnLeft.disabled ? 'none' : 'auto';
+      btnRight.style.pointerEvents = btnRight.disabled ? 'none' : 'auto';
+    };
+
+    // initial update
+    updateButtons();
+
+    // click handlers
+    btnLeft.addEventListener('click', () => {
+      const step = getScrollStep();
+      slider.scrollBy({ left: -step, behavior: 'smooth' });
+      // update after animation
+      setTimeout(updateButtons, 400);
+    });
+
+    btnRight.addEventListener('click', () => {
+      const step = getScrollStep();
+      slider.scrollBy({ left: step, behavior: 'smooth' });
+      setTimeout(updateButtons, 400);
+    });
+
+    // update on manual scroll
+    slider.addEventListener('scroll', () => {
+      // throttle to avoid excessive calls
+      if (this._updateTimeout) clearTimeout(this._updateTimeout);
+      this._updateTimeout = setTimeout(updateButtons, 100);
+    });
+
+    // keyboard support
+    btnLeft.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); btnLeft.click(); } });
+    btnRight.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); btnRight.click(); } });
+
+    // touch swipe support (optional)
+    let startX = 0;
+    slider.addEventListener('touchstart', (e) => { startX = e.touches[0].clientX; }, { passive: true });
+    slider.addEventListener('touchmove', (e) => {
+      if (!startX) return;
+      const diff = startX - e.touches[0].clientX;
+      if (Math.abs(diff) > 40) {
+        slider.scrollBy({ left: diff > 0 ? 200 : -200, behavior: 'smooth' });
+        startX = 0;
+      }
+    }, { passive: true });
+  });
+/////////////////////////////
+    </script>
+    <script src="https://kit.fontawesome.com/a2e0e9a26b.js" crossorigin="anonymous"></script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98928830104217a7',t:'MTc1OTU1ODM5Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

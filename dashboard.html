@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Yatra • Dashboard</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- jsPDF for PDF generation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <style>
+    :root {
+      --brand-600: #0b63b7;
+      --brand-700: #09549a;
+    }
+    html, body {
+      height: 100%;
+      margin: 0;
+    }
+    body {
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background: linear-gradient(180deg, #eef7ff 0%, #f8fbff 100%);
+      -webkit-font-smoothing: antialiased;
+    }
+    .card-shadow {
+      box-shadow: 0 6px 20px rgba(9,79,155,0.07);
+    }
+    .slide-enter {
+      transform: translateX(18px);
+      opacity: 0;
+    }
+    .slide-enter-active {
+      transform: none;
+      opacity: 1;
+      transition: all .24s ease;
+    }
+    .slide-exit {
+      transform: none;
+      opacity: 1;
+    }
+    .slide-exit-active {
+      transform: translateX(18px);
+      opacity: 0;
+      transition: all .18s ease;
+    }
+    .spinner {
+      border: 3px solid rgba(0,0,0,0.08);
+      border-left-color: var(--brand-600);
+      border-radius: 999px;
+      width: 16px;
+      height: 16px;
+      animation: spin .9s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    /* Mobile sidebar collapse styling */
+    @media (max-width: 768px) {
+      aside#sidebar {
+        width: 64px;
+      }
+      aside#sidebar .nav-label {
+        display: none;
+      }
+    }
+  </style>
+</head>
+
+<body class="min-h-screen flex">
+
+  <!-- SIDEBAR -->
+  <aside id="sidebar" class="w-72 bg-gradient-to-b from-[color:var(--brand-700)] to-[color:var(--brand-600)] text-white flex flex-col transition-transform duration-300">
+    <div class="px-6 py-6 border-b border-white/10">
+      <div class="flex items-center gap-3">
+        <div>
+          <h1 class="text-xl font-semibold">Yatra</h1>
+          <p class="text-xs text-white/80">Travel bookings</p>
+        </div>
+      </div>
+    </div>
+    <nav class="px-4 py-6 flex-1 space-y-2">
+      <button id="linkDashboard" class="w-full text-left flex items-center gap-3 px-4 py-3 rounded-lg bg-white/6 hover:bg-white/10 transition">
+        <i data-lucide="compass" class="w-5 h-5"></i>
+        <span class="font-medium nav-label">Explore</span>
+      </button>
+      <button id="linkWishlist" class="w-full text-left flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/6 transition">
+        <i data-lucide="heart" class="w-5 h-5"></i>
+        <span class="font-medium nav-label">Wishlist</span>
+      </button>
+      <button id="linkBookings" class="w-full text-left flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/6 transition">
+        <i data-lucide="calendar" class="w-5 h-5"></i>
+        <span class="font-medium nav-label">My Bookings</span>
+      </button>
+      <button id="linkProfile" class="w-full text-left flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/6 transition">
+        <i data-lucide="user" class="w-5 h-5"></i>
+        <span class="font-medium nav-label">Profile</span>
+      </button>
+    </nav>
+    <div class="px-4 pb-6">
+      <div class="border-t border-white/10 pt-5">
+        <div class="flex items-center gap-3">
+          <img id="sidebarAvatar" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" class="w-11 h-11 rounded-full border-2 border-white/20" alt="avatar">
+          <div class="nav-label">
+            <div id="sidebarName" class="text-sm font-medium">Guest</div>
+            <div id="sidebarEmail" class="text-xs text-white/80">guest@yatra.com</div>
+          </div>
+        </div>
+        <button id="btnLogout" class="w-full mt-4 bg-white text-[color:var(--brand-700)] py-2 rounded-lg font-medium transition hover:bg-white/90">Logout</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="flex-1 p-8 overflow-y-auto">
+    <!-- header -->
+    <div class="flex flex-col md:flex-row items-start md:items-center justify-between mb-6 gap-4">
+      <div>
+        <h2 class="text-2xl font-semibold text-slate-800">Explore trips</h2>
+        <p class="text-sm text-slate-600">Find your next adventure</p>
+      </div>
+      <!-- search + filters -->
+      <div class="flex flex-col md:flex-row items-start md:items-center gap-3">
+        <input id="searchInput" type="search" placeholder="Search trips, e.g. Goa, Manali" class="px-4 py-2 border rounded-lg w-full md:w-72"/>
+        <select id="categoryFilter" class="px-3 py-2 border rounded-lg w-full md:w-auto">
+          <option value="">All categories</option>
+          <option>Hills</option><option>Beaches</option><option>Culture</option><option>Adventure</option><option>Wildlife</option>
+        </select>
+        <input id="maxPrice" type="number" placeholder="Max price (₹)" class="px-3 py-2 border rounded-lg w-full md:w-32"/>
+      </div>
+    </div>
+
+    <!-- grid of trips -->
+    <section id="grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <!-- cards injected via JS -->
+    </section>
+
+    <!-- global inline status at bottom -->
+    <div id="globalStatus" class="mt-6 text-sm text-slate-600"></div>
+  </main>
+
+  <!-- RIGHT SLIDE PANEL (booking/payment/ticket/wishlist/bookings/profile) -->
+  <aside id="panel" class="w-full sm:w-[460px] border-l bg-white p-6 transform translate-x-full transition-transform duration-300 fixed right-0 top-0 h-full z-40 overflow-y-auto">
+    <div class="flex items-center justify-between mb-4">
+      <h3 id="panelTitle" class="text-lg font-semibold text-slate-800">Panel</h3>
+      <button id="panelClose" class="text-slate-500 hover:text-slate-700">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+    </div>
+    <div id="panelBody" class="space-y-4">
+      <!-- dynamic content inserted here -->
+    </div>
+  </aside>
+
+
+
+  <script>
+    lucide.createIcons();
+
+    /* ---------------- CONFIG ---------------- */
+    const API_BASE = "http://localhost:5000/api"; 
+    const user = JSON.parse(localStorage.getItem('user') || 'null') || { id: 1, name: 'Guest', email: 'guest@yatra.com' };
+
+    
+    const trips = [
+  { id: 1, name: "Manali, Himachal Pradesh", region: "North", category: "Hills", price: 15000, days: 5, img: "https://i.pinimg.com/736x/fd/5d/72/fd5d72dfd8712e4741b3ddfcaec0742b.jpg", desc: "Mountain town with pine forests and snow activity.", itinerary: "Day1: Arrival & Mall Road; Day2: Solang Valley; Day3: Rohtang (seasonal)" },
+  { id: 2, name: "Leh-Ladakh", region: "North", category: "Adventure", price: 28000, days: 7, img: "https://i.pinimg.com/736x/16/74/41/16744126f88e97e54dfca129d0529592.jpg", desc: "High-altitude desert with dramatic lakes and passes.", itinerary: "Pangong, Nubra, Khardung La" },
+  { id: 3, name: "Goa Beaches", region: "West", category: "Beaches", price: 12000, days: 4, img: "https://i.pinimg.com/1200x/fe/c0/fb/fec0fb1c9a2a70f4812e3fe9ddc88d86.jpg", desc: "Sandy beaches, water-sports, coastal cuisine.", itinerary: "North Goa, South Goa, Water sports" },
+  { id: 4, name: "Jaipur, Rajasthan", region: "West", category: "Culture", price: 9000, days: 3, img: "https://i.pinimg.com/1200x/9e/35/e9/9e35e983fe70f4c3a1e5dbe22172a4da.jpg", desc: "Palaces, forts and rich Rajasthani culture.", itinerary: "Amber Fort, City Palace, Local bazaars" },
+  { id: 5, name: "Kerala Backwaters, Alleppey", region: "South", category: "Beaches", price: 14000, days: 5, img: "https://i.pinimg.com/1200x/18/71/a4/1871a4f83e483432e48e9a098a6be0aa.jpg", desc: "Houseboats, canals and serene landscapes.", itinerary: "Houseboat cruise, village visits" },
+  { id: 6, name: "Darjeeling, West Bengal", region: "East", category: "Hills", price: 11000, days: 4, img: "https://i.pinimg.com/1200x/a8/72/d4/a872d42662e7405dbb26a4e43cec099a.jpg", desc: "Tea gardens and Himalayan views.", itinerary: "Tiger Hill, Toy Train, Tea Estate" },
+  { id: 7, name: "Rishikesh, Uttarakhand", region: "North", category: "Adventure", price: 8000, days: 3, img: "https://i.pinimg.com/1200x/10/b8/16/10b816273afa1a1c49c7960ffe8c1637.jpg", desc: "Yoga capital & white-water rafting.", itinerary: "Rafting, Ganga Aarti, Ropes course" },
+  { id: 8, name: "Andaman Islands", region: "South", category: "Beaches", price: 23000, days: 6, img: "https://i.pinimg.com/1200x/4a/66/c1/4a66c174d100e6cb5d24a8378da8f2f8.jpg", desc: "Tropical islands with coral reefs.", itinerary: "Havelock, Neil, Scuba" },
+  { id: 9, name: "Kolkata Cultural Walk", region: "East", category: "Culture", price: 7000, days: 2, img: "https://i.pinimg.com/1200x/38/d7/b4/38d7b443c7e895889beb11ad3f9169d6.jpg", desc: "Heritage, museums and Bengali cuisine.", itinerary: "Victoria Memorial, Kumartuli" },
+  { id:10, name: "Mysore Heritage", region: "South", category: "Culture", price: 8500, days: 3, img: "https://i.pinimg.com/736x/9d/fd/56/9dfd56026c45ba723b8dfdec9577ebbc.jpg", desc: "Palace city and silk markets.", itinerary: "Mysore Palace, Chamundi Hill" },
+  { id:11, name: "Ooty Nilgiris", region: "South", category: "Hills", price: 9500, days: 3, img: "https://i.pinimg.com/736x/f7/0b/ad/f70badd76d93ff3de4782957c1066c8e.jpg", desc: "Hill station with botanical gardens.", itinerary: "Botanical gardens, Toy train" },
+  { id:12, name: "Sundarbans Wildlife", region: "East", category: "Wildlife", price: 16000, days: 4, img: "https://i.pinimg.com/1200x/ad/47/2b/ad472b64b2ca3bb8c91bf520077a7077.jpg", desc: "Mangrove tours and tiger country.", itinerary: "Boat safari, village visits" },
+  { id:13, name: "Kanyakumari Coastal", region: "South", category: "Beaches", price: 7000, days: 2, img: "https://i.pinimg.com/1200x/ef/bb/b9/efbbb929d6954e44054e909cdf05babe.jpg", desc: "Southern tip with sunrise views.", itinerary: "Vivekananda Rock, Temple" },
+  { id:14, name: "Hampi Ruins, Karnataka", region: "South", category: "Culture", price: 9500, days: 3, img: "https://i.pinimg.com/1200x/27/72/58/2772584e328628c59dc4dca1aaf946b4.jpg", desc: "UNESCO ruins and boulder landscapes.", itinerary: "Virupaksha, Vittala Temple" },
+  { id:15, name: "Andhra Hills — Araku", region: "South", category: "Hills", price: 8500, days: 3, img: "https://i.pinimg.com/1200x/e5/30/da/e530da35adfe4a0da4f4c40c316b6c52.jpg", desc: "Coffee valley & scenic train ride.", itinerary: "Valley, tribal museum" },
+  { id:16, name: "Pondicherry Auroville", region: "South", category: "Culture", price: 8000, days: 3, img: "https://i.pinimg.com/1200x/07/72/a5/0772a561b1b7777138ba2d6d067b2e94.jpg", desc: "French quarter & spiritual centre.", itinerary: "Promenade, Auroville" },
+  { id:17, name: "Ajanta & Ellora, Maharashtra", region: "West", category: "Culture", price: 12500, days: 3, img: "https://i.pinimg.com/1200x/32/e8/a2/32e8a2d719a2231cdf563848ee8b5988.jpg", desc: "Ancient rock-cut caves and art.", itinerary: "Ajanta caves, Ellora caves" },
+  { id:18, name: "Ranthambore Safari, Rajasthan", region: "West", category: "Wildlife", price: 18000, days: 3, img: "https://i.pinimg.com/1200x/8c/92/e5/8c92e5390e7b190ffe7f7d43792d96e0.jpg", desc: "Tigers and dry deciduous forest.", itinerary: "Game drives and sunset" },
+  { id:19, name: "Puri & Konark, Odisha", region: "East", category: "Culture", price: 9000, days: 3, img: "https://i.pinimg.com/1200x/f8/a2/5f/f8a25f0f22e513ced3fc49ff033aa4c4.jpg", desc: "Temple town and Sun Temple.", itinerary: "Jagannath Puri, Konark Sun Temple" },
+  { id:20, name: "Sikkim Gangtok & Tsomgo", region: "North", category: "Hills", price: 14000, days: 4, img: "https://i.pinimg.com/1200x/ef/6b/c5/ef6bc52ad06b9e0dca440847bc6d2144.jpg", desc: "Mountain culture with monasteries.", itinerary: "MG Road, Tsomgo Lake" },
+  { id:21, name: "Madhya Pradesh — Khajuraho", region: "Central", category: "Culture", price: 10000, days: 2, img: "https://i.pinimg.com/1200x/8a/ee/af/8aeeafbcbde4116c967e58a770b84b6c.jpg", desc: "Famous erotic temples and architecture.", itinerary: "Temple tour, light show" },
+  { id:22, name: "Nainital Lake", region: "North", category: "Hills", price: 8500, days: 3, img: "https://i.pinimg.com/1200x/e2/e0/02/e2e00295cc0ee598dc9e6bc9a35c6c7a.jpg", desc: "Lake town with scenic views.", itinerary: "Boating, Mall road" },
+  { id:23, name: "Sundarbans Cruise", region: "East", category: "Wildlife", price: 17000, days: 4, img: "https://i.pinimg.com/1200x/4b/2e/99/4b2e992706738c3fafc116209f3b14a6.jpg", desc: "Mangrove forest boat safaris.", itinerary: "Boat safaris, birdwatching" },
+  { id:24, name: "Guwahati & Kaziranga", region: "East", category: "Wildlife", price: 15000, days: 4, img: "https://i.pinimg.com/1200x/c6/88/e5/c688e576fd6cff64fa0d62eb5e3869b0.jpg", desc: "One-horned rhino & riverine forests.", itinerary: "Kaziranga jeep & elephant safaris" },
+  { id:25, name: "Coorg Coffee Trails", region: "South", category: "Hills", price: 12000, days: 3, img: "https://i.pinimg.com/736x/91/d9/8a/91d98a48348c116b7ce3bf71f92779ed.jpg", desc: "Coffee plantations and waterfalls.", itinerary: "Plantation tours, Abbey falls" },
+  { id:26, name: "Lucknow Heritage", region: "North", category: "Culture", price: 8000, days: 2, img: "https://i.pinimg.com/736x/5e/2a/df/5e2adff40669a86800f3b824de6a0f1b.jpg", desc: "Awadhi cuisine and historic monuments.", itinerary: "Bara Imambara, Tunday Kababi" },
+  { id:27, name: "Mumbai City & Elephanta", region: "West", category: "Culture", price: 9500, days: 3, img: "https://i.pinimg.com/1200x/fb/49/8d/fb498d0023754399154470d8e95859eb.jpg", desc: "Metro city life and island caves.", itinerary: "Gateway, Elephanta Caves" },
+  { id:28, name: "Rann of Kutch", region: "West", category: "Culture", price: 16000, days: 4, img: "https://i.pinimg.com/1200x/af/81/62/af81620f3bfc60141babe556ae92fd90.jpg", desc: "Salt desert & cultural festival.", itinerary: "Rann, local crafts" },
+  { id:29, name: "Gokarna Beaches", region: "West", category: "Beaches", price: 9000, days: 3, img: "https://i.pinimg.com/1200x/3c/4a/1f/3c4a1f06feb03c72b68d0e55f1f8d00c.jpg", desc: "Laid-back beaches and trekking.", itinerary: "Om Beach, Kudle Beach" },
+  { id:30, name: "Shillong & Cherrapunji", region: "East", category: "Hills", price: 13000, days: 4, img: "https://i.pinimg.com/736x/e2/fd/a1/e2fda1b2176f06c3dec2412d42b747fd.jpg", desc: "Lush hills and heavy rainfall spots.", itinerary: "Nohkalikai fall, Living root bridges"},
+  { 
+    id:31, 
+    name: "Golden Triangle Tour", 
+    region: "North", 
+    category: "Heritage", 
+    price: 25000, 
+    days: 7, 
+    img: "https://i.pinimg.com/1200x/25/d1/7b/25d17bc2c463029cffa9d3d083ebb00d.jpg", 
+    desc: "Explore Delhi, Agra, and Jaipur — experience royal palaces, Mughal heritage, and the Taj Mahal.", 
+    itinerary: "Day1: Delhi city tour; Day2: Agra Fort & Taj Mahal; Day3: Jaipur palaces; Day4–7: Cultural exploration and shopping." 
+  },
+  { 
+    id:32, 
+    name: "Kerala Backwaters", 
+    region: "South", 
+    category: "Nature", 
+    price: 18000, 
+    days: 5, 
+    img: "https://i.pinimg.com/1200x/2f/1d/80/2f1d807dff41d1787dbf42a1db99fa1c.jpg", 
+    desc: "Cruise through serene lagoons, lush palm-fringed canals, and stay in traditional houseboats.", 
+    itinerary: "Day1: Arrival at Kochi; Day2: Backwater cruise; Day3: Alleppey houseboat; Day4–5: Village visits and relaxation." 
+  },
+  { 
+    id: 33, 
+    name: "Goa Beach Holiday", 
+    region: "West", 
+    category: "Beach", 
+    price: 15000, 
+    days: 4, 
+    img: "https://i.pinimg.com/1200x/bd/3e/36/bd3e36eb07b7d0b0a53d77c3df7f9913.jpg", 
+    desc: "Relax on sun-kissed beaches, try water sports, and explore the vibrant nightlife of Goa.", 
+    itinerary: "Day1: North Goa beaches; Day2: Water sports; Day3: Fort Aguada & markets; Day4: Leisure and departure." 
+  },
+  { 
+    id: 34, 
+    name: "Himalayan Adventure", 
+    region: "North", 
+    category: "Adventure", 
+    price: 35000, 
+    days: 10, 
+    img: "https://i.pinimg.com/1200x/52/fe/13/52fe13332b8ac7417a6fb45ebc63becb.jpg", 
+    desc: "Trek through majestic mountains, visit ancient monasteries, and breathe the Himalayan air.", 
+    itinerary: "Day1–2: Arrival and acclimatization; Day3–7: Trekking; Day8: Monastery visits; Day9–10: Return journey." 
+  }
+];
+
+    let wishlist = JSON.parse(localStorage.getItem('yatra_wishlist') || '[]');
+    let bookings = JSON.parse(localStorage.getItem('yatra_bookings') || '[]');
+
+    const grid = document.getElementById('grid');
+    const searchInput = document.getElementById('searchInput');
+    const categoryFilter = document.getElementById('categoryFilter');
+    const maxPriceInput = document.getElementById('maxPrice');
+    const panel = document.getElementById('panel');
+    const panelBody = document.getElementById('panelBody');
+    const panelTitle = document.getElementById('panelTitle');
+    const panelClose = document.getElementById('panelClose');
+    const sidebarName = document.getElementById('sidebarName');
+    const sidebarEmail = document.getElementById('sidebarEmail');
+    const sidebarAvatar = document.getElementById('sidebarAvatar');
+    const globalStatus = document.getElementById('globalStatus');
+    const toastWrap = document.getElementById('toastWrap');
+
+    sidebarName.textContent = user.name || 'Guest';
+    sidebarEmail.textContent = user.email || 'guest@yatra.com';
+    sidebarAvatar.src = user.avatar || 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
+
+    /* ---------------- HELPERS ---------------- */
+    function formatINR(n) {
+      return '₹' + Number(n).toLocaleString('en-IN');
+    }
+
+    function showStatus(text, type='info', timeout=2600) {
+      globalStatus.textContent = text;
+      globalStatus.className = `mt-6 text-sm font-medium ${
+        type === 'success' ? 'text-green-600' :
+        type === 'error'   ? 'text-red-600'   : 'text-slate-600'
+      }`;
+      if (timeout > 0) {
+        setTimeout(()=>{
+          if(globalStatus.textContent === text) globalStatus.textContent = '';
+        }, timeout);
+      }
+    }
+
+    /*function toast(text, kind='info', ttl=3200) {
+      const el = document.createElement('div');
+      el.className = `mb-3 px-4 py-2 rounded-lg shadow-lg ${
+        kind==='error' ? 'bg-red-50 text-red-700' : 'bg-white text-slate-700'
+      }`;
+      el.innerHTML = `<div class="flex items-center gap-3">
+        <div class="${kind==='error'?'text-red-600':'text-slate-400'}">
+          ${kind==='error' ? '⚠' : '✔'}
+        </div>
+        <div>${text}</div>
+      </div>`;
+      toastWrap.appendChild(el);
+      setTimeout(()=>{ el.remove(); }, ttl);
+    }*/
+
+    /* ---------------- RENDER GRID ---------------- */
+    function renderGrid(){
+      const q = (searchInput.value||'').trim().toLowerCase();
+      const category = categoryFilter.value;
+      const maxPrice = Number(maxPriceInput.value) || Infinity;
+
+      const filtered = trips.filter(t => {
+        if (category && t.category !== category) return false;
+        if (t.price > maxPrice) return false;
+        if (q && ! (`${t.name} ${t.desc} ${t.region} ${t.category}`).toLowerCase().includes(q)) return false;
+        return true;
+      });
+
+      grid.innerHTML = filtered.map(t => `
+        <article class="bg-white rounded-xl overflow-hidden card-shadow hover:shadow-lg transition-shadow">
+          <img src="${t.img}" alt="${t.name}" class="w-full h-44 object-cover">
+          <div class="p-4">
+            <div class="flex justify-between items-start">
+              <div>
+                <h3 class="font-semibold text-slate-800">${t.name}</h3>
+                <p class="text-xs text-slate-500 mt-1">${t.region} • ${t.category}</p>
+              </div>
+              <div class="text-right">
+                <div class="text-xs text-slate-500">from</div>
+                <div class="text-lg font-semibold text-[color:var(--brand-600)]">${formatINR(t.price)}</div>
+              </div>
+            </div>
+            <p class="text-sm text-slate-600 mt-3">${t.desc}</p>
+            <div class="mt-4 flex items-center justify-between gap-2">
+              <div class="flex gap-2">
+                <button class="inline-flex items-center gap-2 px-3 py-1.5 border rounded-md text-[color:var(--brand-600)]" data-id="${t.id}" data-action="wishlist">
+                  <i data-lucide="heart" class="w-4 h-4"></i><span class="text-sm">Wishlist</span>
+                </button>
+                <button class="inline-flex items-center gap-2 px-3 py-1.5 bg-[color:var(--brand-600)] text-white rounded-md" data-id="${t.id}" data-action="book">
+                  <i data-lucide="calendar" class="w-4 h-4"></i><span class="text-sm">Book</span>
+                </button>
+              </div>
+              <button class="text-xs text-slate-500" data-id="${t.id}" data-action="details">Details</button>
+            </div>
+          </div>
+        </article>
+      `).join('');
+
+      lucide.createIcons();
+
+      // attach handlers
+      grid.querySelectorAll('button[data-action]').forEach(btn=>{
+        btn.onclick = ()=> {
+          const id = Number(btn.dataset.id);
+          const action = btn.dataset.action;
+          if(action === 'wishlist') handleAddWishlist(id);
+          if(action === 'book') openBookingPanel(id);
+          if(action === 'details') openDetailsPanel(id);
+        };
+      });
+    }
+    function openBookingPanel(id) {
+  activeTrip = trips.find(t => t.id === id);
+  if (!activeTrip) return;
+  showBookingForm();  // this displays the booking form inside the right-side panel
+  openPanel();        // this slides the panel into view
+}
+
+    let activeTrip = null;
+    let panelMode = null; // 'details' | 'book' | 'payment' | 'ticket' | 'wishlist' | 'bookings' | 'profile'
+
+    function openPanel(){
+      panel.classList.remove('translate-x-full');
+    }
+    function closePanel(){
+      panel.classList.add('translate-x-full');
+    }
+    async function handleAddWishlist(id) {
+  const t = trips.find(x => x.id === id);
+  if (!t) {
+    toast('Trip not found', 'error');
+    return;
+  }
+
+  console.log('Adding wishlist for:', user.id, t.name);
+
+  try {
+    const res = await fetch(`${API_BASE}/wishlist/add`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ user_id: user.id, trip_name: t.name })
+    });
+
+    const json = await res.json();
+    console.log("Wishlist add response:", json);
+
+    if (json.success) {
+      toast("Added to wishlist", "success");
+      // Refresh wishlist view instantly if open
+      if (panelMode === "wishlist") openWishlistView();
+    } else {
+      toast("Wishlist add failed: " + json.message, "error");
+    }
+
+  } catch (err) {
+    console.error("Wishlist fetch failed:", err);
+    toast("Network error while adding wishlist", "error");
+  }
+}
+
+
+    /* ---------------- DETAILS -> BOOK -> PAYMENT FLOW ---------------- */
+    function openDetailsPanel(id){
+      activeTrip = trips.find(x=>x.id===id);
+      panelMode = 'details';
+      panelTitle.textContent = 'Trip details';
+      panelBody.innerHTML = `
+        <img src="${activeTrip.img}" class="w-full h-36 object-cover rounded-md mb-3">
+        <h4 class="font-semibold text-slate-800 mb-1">${activeTrip.name}</h4>
+        <div class="text-xs text-slate-500 mb-3">${activeTrip.region} • ${activeTrip.category} • ${activeTrip.days} days</div>
+        <p class="text-sm text-slate-700 mb-3">${activeTrip.desc}</p>
+        <div class="text-sm text-slate-700 mb-4"><strong>Itinerary:</strong><br>${activeTrip.itinerary}</div>
+        <div class="flex items-center justify-between gap-2">
+          <div>
+            <div class="text-xs text-slate-500">Price</div>
+            <div class="text-lg font-semibold text-[color:var(--brand-600)]">${formatINR(activeTrip.price)}</div>
+          </div>
+          <div class="flex gap-2">
+            <button id="detailWishlistBtn" class="px-3 py-2 border rounded-md text-[color:var(--brand-600)]">
+              <i data-lucide="heart" class="w-4 h-4"></i> Add
+            </button>
+            <button id="detailBookBtn" class="px-3 py-2 bg-[color:var(--brand-600)] text-white rounded-md">
+              <i data-lucide="calendar" class="w-4 h-4"></i> Book
+            </button>
+          </div>
+        </div>
+      `;
+      lucide.createIcons();
+      openPanel();
+      document.getElementById('detailWishlistBtn').onclick = ()=> handleAddWishlist(id);
+      document.getElementById('detailBookBtn').onclick = ()=> showBookingForm();
+    }
+
+    function showBookingForm(){
+      panelMode = 'book';
+      panelTitle.textContent = 'Book trip';
+      panelBody.innerHTML = `
+        <img src="${activeTrip.img}" class="w-full h-32 object-cover rounded-md mb-3">
+        <h4 class="font-semibold text-slate-800">${activeTrip.name}</h4>
+        <div class="text-xs text-slate-500 mb-3">${activeTrip.region} • ${activeTrip.category} • ${activeTrip.days} days</div>
+        <form id="bookingForm" class="space-y-3">
+          <div>
+            <label class="text-xs text-slate-600">Passenger name</label>
+            <input id="passName" type="text" class="w-full border rounded-md p-2" value="${user.name || ''}">
+          </div>
+          <div>
+            <label class="text-xs text-slate-600">Email</label>
+            <input id="passEmail" type="email" class="w-full border rounded-md p-2" value="${user.email || ''}">
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="text-xs text-slate-600">Travel date</label>
+              <input id="passDate" type="date" class="w-full border rounded-md p-2">
+            </div>
+            <div>
+              <label class="text-xs text-slate-600">Travellers</label>
+              <input id="passCount" type="number" min="1" value="1" class="w-full border rounded-md p-2">
+            </div>
+          </div>
+          <div>
+            <label class="text-xs text-slate-600">Notes (optional)</label>
+            <textarea id="passNotes" rows="2" class="w-full border rounded-md p-2 text-sm"></textarea>
+          </div>
+          <div class="flex items-center justify-between mt-2">
+            <div>
+              <div class="text-xs text-slate-500">Total</div>
+              <div class="text-lg font-semibold text-[color:var(--brand-600)]" id="bookingTotal">${formatINR(activeTrip.price)}</div>
+            </div>
+            <div class="flex gap-2">
+              <button type="button" id="toPaymentBtn" class="px-4 py-2 bg-[color:var(--brand-600)] text-white rounded-md">Proceed to payment</button>
+            </div>
+          </div>
+        </form>
+      `;
+      document.getElementById('passCount').addEventListener('input', ()=> {
+        const cnt = Number(document.getElementById('passCount').value) || 1;
+        document.getElementById('bookingTotal').textContent = formatINR(activeTrip.price * cnt);
+      });
+      document.getElementById('toPaymentBtn').onclick = handleProceedToPayment;
+      openPanel();
+    }
+
+    let pendingBookingPayload = null;
+   async function handleProceedToPayment(){
+  const name  = document.getElementById('passName').value.trim();
+  const email = document.getElementById('passEmail').value.trim();
+  const date  = document.getElementById('passDate').value;
+  const count = Number(document.getElementById('passCount').value) || 1;
+  const notes = document.getElementById('passNotes').value.trim();
+
+  if(!name || !email || !date){
+    showInlineError('Please complete name, email and travel date.');
+    return;
+  }
+
+  const bookingPayload = {
+    tripId:     activeTrip.id,
+    tripName:   activeTrip.name,
+    userId:     user.id,
+    userName:   name,
+    userEmail:  email,
+    travelDate: date,
+    travellers: count,
+    notes:      notes,
+    amount:     activeTrip.price * count,
+    createdAt:  new Date().toISOString()
+  };
+
+  console.log('Proceeding to payment with payload:', bookingPayload);
+
+  try {
+    const resp = await fetch(`${API_BASE}/bookings/add`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        user_id: bookingPayload.userId,
+        trip_name: bookingPayload.tripName,
+        price: bookingPayload.amount,
+        date: bookingPayload.travelDate,
+        meta: {
+          travellers: bookingPayload.travellers,
+          notes: bookingPayload.notes,
+          txnId: 'TXN' + Date.now()
+        }
+      })
+    });
+
+    console.log('Booking add response status:', resp.status);
+    const json = await resp.json();
+    console.log('Booking add response JSON:', json);
+
+    if(!resp.ok || !json.success){
+      console.error('Booking add failed:', json.message);
+      showStatus('Booking failed. Please try again.','error');
+      return;
+    }
+
+    // Success
+    const bookingId = json.bookingId || ('YATRA-' + Math.floor(100000 + Math.random()*900000));
+    const completeBooking = {
+      ...bookingPayload,
+      bookingId: bookingId,
+      txnId: (json.txnId || ('TXN' + Date.now()))
+    };
+
+    renderPaymentForm(completeBooking);
+
+  } catch(e){
+    console.error('Booking add network error:', e);
+    showStatus('Network error during booking.','error');
+  }
+}
+
+    function showInlineError(msg){
+      const node = document.createElement('div');
+      node.id = 'inlineErr';
+      node.className = 'px-4 py-2 rounded-md bg-red-50 text-red-700 mb-3';
+      node.textContent = msg;
+      panelBody.prepend(node);
+      setTimeout(()=>node.remove(), 3000);
+    }
+ function renderPaymentForm(bookingPayload) {
+  const panelBody = document.getElementById('panelBody');
+  const panelTitle = document.getElementById('panelTitle');
+
+  panelTitle.textContent = 'Payment';
+  panelBody.innerHTML = `
+    <div class="mb-4 space-y-1">
+      <p><strong>Trip:</strong> ${bookingPayload.tripName}</p>
+      <p><strong>Date:</strong> ${bookingPayload.travelDate}</p>
+      <p><strong>Amount:</strong> ₹${bookingPayload.amount.toLocaleString()}</p>
+    </div>
+
+    <div class="space-y-3">
+      <input id="cardHolder" type="text" placeholder="Card Holder Name"
+             class="w-full border border-gray-300 rounded-md p-2">
+      <input id="cardNumber" type="text" placeholder="Card Number"
+             class="w-full border border-gray-300 rounded-md p-2">
+      <div class="grid grid-cols-2 gap-2">
+        <input id="cardExpiry" type="text" placeholder="MM/YY"
+               class="border border-gray-300 rounded-md p-2">
+        <input id="cardCvv" type="password" placeholder="CVV"
+               class="border border-gray-300 rounded-md p-2">
+      </div>
+      <button id="payBtn"
+        class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-md transition">
+        Pay & Confirm
+      </button>
+    </div>
+  `;
+
+  // Attach payment handler
+  document.getElementById('payBtn').onclick = () => submitPayment(bookingPayload);
+}
+
+
+
+// Adjusted submitPayment()
+async function submitPayment(bookingPayload) {
+  const cardHolder = document.getElementById('cardHolder')?.value.trim();
+  const cardNumber = document.getElementById('cardNumber')?.value.trim();
+  const cardExpiry = document.getElementById('cardExpiry')?.value.trim();
+  const cardCvv    = document.getElementById('cardCvv')?.value.trim();
+
+  if (!cardHolder || !cardNumber || !cardExpiry || !cardCvv) {
+    showInlineError('Please fill all payment details.');
+    return;
+  }
+
+  console.log('Processing payment for booking:', bookingPayload);
+
+  // Simulate payment processing
+  showStatus('Processing payment...', 'info');
+
+  setTimeout(() => {
+    showStatus('Payment successful! Generating ticket...', 'success');
+    renderTicket(bookingPayload);
+  }, 2000);
+}
+
+
+    async function renderTicket(booking){
+      panelMode = 'ticket';
+      panelTitle.textContent = 'Your e-ticket';
+
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ unit:'pt', format:'a4' });
+
+      doc.setFillColor(11,99,183);
+      doc.rect(0,0,595,80,'F');
+      doc.setFontSize(20);
+      doc.setTextColor(255,255,255);
+      doc.text('YATRA - e-Ticket', 40, 50);
+
+      doc.setFontSize(12);
+      doc.setTextColor(34,34,34);
+      const leftX = 40;
+      let y = 110;
+      doc.text(`Booking ID: ${booking.bookingId}`, leftX, y); y+=18;
+      doc.text(`Transaction ID: ${booking.txnId}`, leftX, y); y+=18;
+      doc.text(`Passenger: ${booking.userName}`, leftX, y); y+=18;
+      doc.text(`Email: ${booking.userEmail}`, leftX, y); y+=18;
+      doc.text(`Trip: ${booking.tripName}`, leftX, y); y+=18;
+      doc.text(`Date of travel: ${booking.travelDate}`, leftX, y); y+=18;
+      doc.text(`Travellers: ${booking.travellers}`, leftX, y); y+=18;
+      doc.text(`Amount Paid: ${formatINR(booking.amount)}`, leftX, y); y+=18;
+
+      const trip = trips.find(t=>t.id===booking.tripId);
+      if(trip && trip.itinerary){
+        y+=8;
+        doc.setFontSize(11);
+        doc.setTextColor(70,70,70);
+        doc.text('Itinerary:', leftX, y); y+=14;
+        const lines = doc.splitTextToSize(trip.itinerary, 500);
+        doc.text(lines, leftX, y);
+      }
+
+      doc.setFontSize(10);
+      doc.setTextColor(120,120,120);
+      doc.text('This is an e-ticket. Please bring a photo ID at check-in.', leftX, 740);
+
+      const pdfBlob = doc.output('blob');
+      const url = URL.createObjectURL(pdfBlob);
+
+      panelBody.innerHTML = `
+        <div class="space-y-3">
+          <div class="bg-white rounded-md p-3 border">
+            <div class="flex items-start justify-between mb-2">
+              <div>
+                <div class="text-xs text-slate-500">Booking ID</div>
+                <div class="font-semibold text-slate-800">${booking.bookingId}</div>
+              </div>
+              <div class="text-right">
+                <div class="text-xs text-slate-500">Amount</div>
+                <div class="font-semibold text-[color:var(--brand-600)]">${formatINR(booking.amount)}</div>
+              </div>
+            </div>
+            <div class="text-sm text-slate-700">
+              <div><strong>Trip:</strong> ${booking.tripName}</div>
+              <div><strong>Passenger:</strong> ${booking.userName}</div>
+              <div><strong>Date:</strong> ${booking.travelDate}</div>
+              <div><strong>Travellers:</strong> ${booking.travellers}</div>
+              <div class="mt-2 text-xs text-slate-500"><strong>Transaction:</strong> ${booking.txnId}</div>
+            </div>
+          </div>
+          <div class="flex gap-2">
+            <a id="downloadPdf" href="${url}" download="YATRA-${booking.bookingId}.pdf" class="flex-1 text-center px-4 py-2 bg-[color:var(--brand-600)] text-white rounded-md">Download PDF</a>
+            <button id="closePanelBtn" class="px-4 py-2 border rounded-md">Close</button>
+          </div>
+        </div>
+      `;
+      document.getElementById('closePanelBtn').onclick = ()=> closePanel();
+      openPanel();
+    }
+    function toast(msg, kind='info') {
+  console.log('TOAST:', kind, msg);
+  showStatus(msg, kind === 'error' ? 'error' : 'success');
+}
+
+async function openWishlistView() {
+  panelMode = 'wishlist';
+  panelTitle.textContent = 'Wishlist';
+
+  console.log('Fetching wishlist for user id =', user.id);
+
+  let remote = [];
+  try {
+    const res = await fetch(`${API_BASE}/wishlist/${user.id}`, {
+      headers: { 'Accept': 'application/json' }
+    });
+
+    if (!res.ok) {
+      console.error('Wishlist fetch error status:', res.status);
+      throw new Error(`HTTP ${res.status}`);
+    }
+
+    const json = await res.json();
+    console.log('Wishlist response:', json);
+
+    if (json && json.success && Array.isArray(json.data)) {
+      remote = json.data;
+    } else {
+      console.warn('Wishlist API responded but no valid data:', json);
+      remote = [];
+    }
+
+  } catch (e) {
+    console.error('Failed to fetch wishlist:', e);
+  }
+
+  const data = remote.length ? remote : [];
+
+  panelBody.innerHTML = data.length
+    ? data.map(w => `
+        <div class="bg-white border rounded-md p-3 mb-3 flex gap-3">
+          <div class="flex-1">
+            <div class="font-semibold text-slate-800">${w.trip_name}</div>
+            <div class="text-xs text-slate-500">
+              ${w.added_at ? new Date(w.added_at).toLocaleString() : ''}
+            </div>
+          </div>
+        </div>
+      `).join('')
+    : `<div class="text-sm text-slate-600">Your wishlist is empty.</div>`;
+
+  openPanel();
+}
+
+async function openBookingsList(){
+  panelMode = 'viewBookings';
+  panelTitle.textContent = 'My Bookings';
+
+  let remote = [];
+  try {
+    const res = await fetch(`${API_BASE}/bookings/${user.id}`, {
+      headers: { 'Accept': 'application/json' }
+    });
+    if(res.ok){
+      const json = await res.json();
+      remote = Array.isArray(json) ? json : (json.data || []);
+    } else {
+      console.error('Bookings fetch failed, status:', res.status);
+    }
+  } catch(e){
+    console.error('Error fetching bookings:', e);
+    remote = [];
+  }
+
+  const combined = Array.isArray(remote) ? remote : bookings;
+
+  panelBody.innerHTML = combined.length
+    ? combined.map(b => `
+        <div class="bg-white border rounded-md p-3 mb-3">
+          <div class="flex justify-between items-start">
+            <div>
+              <div class="text-sm text-slate-600">${b.trip_name || b.tripName}</div>
+              <div class="font-semibold text-slate-800">${b.userName || user.name}</div>
+              <div class="text-xs text-slate-500">${(b.date || b.travelDate) || ''} • ${b.travellers || ''} traveller(s)</div>
+            </div>
+            <div class="text-right">
+              <div class="text-sm font-semibold text-[color:var(--brand-600)]">${formatINR(b.price || b.amount)}</div>
+              <button class="mt-2 px-3 py-1 border rounded-md" data-id="${b.bookingId || b.id}" data-action="view">View</button>
+            </div>
+          </div>
+        </div>
+      `).join('')
+    : `<div class="text-sm text-slate-600">No bookings yet.</div>`;
+
+  panelBody.querySelectorAll('button[data-action="view"]').forEach(btn => {
+    btn.onclick = () => {
+      const id = btn.dataset.id;
+      const bk = combined.find(x => (x.bookingId == id) || (String(x.id) === String(id)));
+      if(bk){
+        const normalized = {
+          bookingId:  bk.bookingId || ('YATRA-'+(bk.id || Math.floor(100000 + Math.random()*900000))),
+          txnId:      bk.txnId     || ('TXN'+Date.now()),
+          userName:   bk.userName  || user.name,
+          userEmail:  bk.userEmail || user.email,
+          tripName:   bk.trip_name || bk.tripName,
+          travelDate: bk.date       || bk.travelDate,
+          travellers: bk.travellers || 1,
+          amount:     bk.price      || bk.amount  || 0
+        };
+        renderTicket(normalized);
+      } else {
+        showStatus('Could not find booking details', 'error');
+      }
+    };
+  });
+
+  openPanel();
+}
+
+
+   async function openProfileView(){
+  panelMode = 'profile';
+  panelTitle.textContent = 'Profile';
+
+  let profile = user;
+  try {
+    const res = await fetch(`${API_BASE}/profile/${user.id}`);
+    if(res.ok){
+      const data = await res.json();
+      profile = data;  // assuming backend returns the user object with name, email etc
+    }
+  } catch(e){
+    // fallback to local user
+  }
+
+  panelBody.innerHTML = `
+    <div>
+      <div class="text-sm text-slate-600 mb-2">Name</div>
+      <div class="font-semibold mb-3">${profile.name || profile.username || user.name}</div>
+
+      <div class="text-sm text-slate-600 mb-2">Email</div>
+      <div class="font-semibold mb-3">${profile.email || user.email}</div>
+
+      <!-- Removed edit form and fields, read-only view -->
+    </div>
+  `;
+
+  openPanel();
+}
+
+
+    document.getElementById('panelClose').addEventListener('click', closePanel);
+    document.getElementById('linkWishlist').addEventListener('click', openWishlistView);
+    document.getElementById('linkBookings').addEventListener('click', openBookingsList);
+    document.getElementById('linkProfile').addEventListener('click', openProfileView);
+    document.getElementById('linkDashboard').addEventListener('click', ()=>{ closePanel(); });
+
+    document.getElementById('btnLogout').addEventListener('click', ()=> {
+      localStorage.removeItem('user');
+      window.location.href = 'login.html';
+    });
+
+    searchInput.addEventListener('input', renderGrid);
+    categoryFilter.addEventListener('change', renderGrid);
+    maxPriceInput.addEventListener('input', renderGrid);
+
+    renderGrid();
+
+    toast('UI ready — All flows happen inline (no popups).','info', 2600);
+
+    document.addEventListener('click', (e) => {
+      if(e.target.closest('[data-lucide]')) lucide.createIcons();
+    });
+
+  </script>
+</body>
+</html>
